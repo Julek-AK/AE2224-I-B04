@@ -1,5 +1,5 @@
 #Notes: orignigal risk is in log 10 scale
-#Note: for now, each CDm is taken as an input and the CDM TCA as the target value
+#Note: for now, each CDm is taken as an input and the CDM @ TCA as the target value
 
 import pandas as pd
 import numpy as np 
@@ -13,8 +13,16 @@ rawData = rawData.to_numpy()
 X = []
 t = []
 
-N_event = 0
-N_totalEvents = 13154
+event_IDs = rawData[:, 0].astype(int)
+event_counts = np.bincount(event_IDs)
+event_IDs = np.unique(event_IDs)
+
+for i in range(rawData): 
+    
+    
+
+
+    
 
 
     
