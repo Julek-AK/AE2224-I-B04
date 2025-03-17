@@ -17,9 +17,24 @@ event_IDs = rawData[:, 0].astype(int)
 event_counts = np.bincount(event_IDs)
 event_IDs = np.unique(event_IDs)
 
-for i in range(rawData): 
-    
-    
+i = 0 
+for CDM in rawData:
+    if i == event_counts[i]:
+        for j in range(event_counts[i]):
+            Y = np.append(CDM[1,2])
+        i += 1
+
+    if CDM[0] == event_IDs[i]:
+        X = np.append(CDM[1,2])
+
+print(len(X), len(Y))
+
+
+
+
+
+
+
 
 
     
