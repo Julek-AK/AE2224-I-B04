@@ -9,7 +9,7 @@ class Data_Manager:
         self.test_df = None
 
     def load_data(self):
-        self.train.df = pd.read_csv(self.train_file):
+        self.train.df = pd.read_csv(self.train_file)
     
     def filter_by_risk(self,risk_threshold):
         event_ids_to_keep = self.train_df.groupby('event_id')['risk'].max() <= risk_threshold
