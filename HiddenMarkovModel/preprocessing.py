@@ -61,9 +61,10 @@ if __name__ == '__main__':
     # Cut un-needed columns
     csv = csv.iloc[:, :4]
     
+    # Converts the risk entries into 0 and 1 regarding the risk
     threshold = -6
+    csv["risk"] = csv["risk"].apply(lambda x: 0 if x < threshold else 1)
 
-
-
-
+    # Print result
+    print(csv)
 
