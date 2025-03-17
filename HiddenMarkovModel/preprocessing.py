@@ -13,7 +13,6 @@ import numpy as np
 ...
 
 
-
 def cleanup(csv):
     """
     Removes all NaN values, as well as events with physically nonsensical parameters
@@ -41,30 +40,90 @@ def cleanup(csv):
     return csv
 
 
-def convert_to_binary_risk(row, risk_threshhold=-7):
-    if row['risk'] > risk_threshhold:
-        return 1
-    else:
-        return 0
-
-
-
-
 if __name__ == '__main__':
     csv = pd.read_csv(r"DataSets\train_data.csv")
 
     csv = cleanup(csv)
 
-    # Additional removals
-    csv = csv[csv['risk'] != -30]
+    # Additional cleanups
+    csv = csv[csv['time_to_tca'] > 0]
 
-    # Cut un-needed columns
+    # Cut un-needed columns and duplicate rows
     csv = csv.iloc[:, :4]
+    csv = csv.drop_duplicates()
     
-    # Converts the risk entries into 0 and 1 regarding the risk
+    # Converts the risk entries into binary determinator of high/low risk
     threshold = -6
-    csv["risk"] = csv["risk"].apply(lambda x: 0 if x < threshold else 1)
+    csv['risk'] = csv['risk'].apply(lambda x: 0 if x < threshold else 1)
 
     # Print result
-    print(csv)
+    # print(csv)
 
+    n_events = csv['event_id'].nunique()
+    print(f"There are {n_events} events to process")
+
+    # max_n_cdms = csv['event_id'].value_counts().max()
+    # print(f"Longest cdm string: {max_n_cdms}")
+    # print(csv[csv["event_id"] == csv["event_id"].value_counts().idxmax()])
+
+    # min_n_cdms = csv['event_id'].value_counts().min()
+    # print(f"Shortest cdm string: {min_n_cdms}")
+    # print(csv[csv["event_id"] == csv["event_id"].value_counts().idxmin()])
+
+    # Preview specific event
+    # print(csv[csv['event_id'] == 12779])
+
+    # Prepare output DataFrame
+    data = pd.DataFrame(columns=['event_id', 'observation', 'outcome'])
+
+
+    for event_id, df in csv.groupby('event_id'):
+        print(f"Processing event {event_id}")
+        
+        observations = df[df['time_to_tca'] > 2]
+        predictions = df[df['time_to_tca'] < 2]
+
+        n_obsv = len(observations)
+        n_pred = len(predictions)
+
+        # Remove events with not enough data
+        if n_obsv == 0 or n_pred == 0:
+            print("insufficient CDMs")
+            continue
+        
+        # Prepare risk sequence based on number of observation CDMs
+        if n_obsv > 15:
+            risks = observations['risk'].tolist()
+            risk_sequence = risks[-15:]
+
+        elif n_obsv == 15:
+            risk_sequence = observations['risk'].tolist()
+
+        elif n_obsv < 15:
+            risks = observations['risk'].tolist()
+            times = observations['time_to_tca'].tolist()
+
+            # Distribute known datapoints amongst the 15 required CDMs
+            risk_sequence = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+            for risk, time in zip(risks, times):
+                i = (6 - int(np.floor(time)))*3
+                while i < 15:
+                    if risk_sequence[i] is None:
+                        risk_sequence[i] = risk
+                        break
+                    else:
+                        i+=1
+
+            # Pad-left
+            for i in range(1, 15):
+                if risk_sequence[i] is None:
+                    risk_sequence[i] = risk_sequence[i-1]
+
+            raise NotImplementedError
+            
+        else:
+            continue
+
+        # print(len(risk_sequence))
+            
+        
