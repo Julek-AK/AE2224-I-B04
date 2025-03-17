@@ -21,11 +21,11 @@ i = 0
 for CDM in rawData:
     if i == event_counts[i]:
         for j in range(event_counts[i]):
-            Y = np.append(CDM[1,2])
+            t = np.append(t, CDM[1:3])
         i += 1
 
     if CDM[0] == event_IDs[i]:
-        X = np.append(CDM[1,2])
+        X = np.append(X, CDM[1:3])
 
 print(len(X), len(Y))
 
