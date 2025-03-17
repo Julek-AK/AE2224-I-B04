@@ -33,6 +33,7 @@ def readData ():
             j +=1
 
     return X,t 
+print(readData())
 
         
 
