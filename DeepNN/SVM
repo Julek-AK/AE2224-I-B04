@@ -1,12 +1,21 @@
 from sklearn import svm
+from sklearn import metrics
 import DataReading as DR
-X,t = DR.readData("train")
-T = []
-for CDM in t:
-    if CDM>-5:
+X_train,t_train = DR.readData("train")
+X_test,t_test = DR.readData("test")
+def classify(t):
+  T = []
+  for CDM in t:
+    if CDM>-6:
         T.append(1)
     else:
         T.append(0)
-print(T)
+  return T
+T_train = classify(t_train)
+T_test = classify(t_test)
 clf = svm.SVC(kernel='linear') 
-clf.fit(X,T)
+clf.fit(X_train,T_train)
+T_pred = clf.predict(X_test)
+print("Accuracy:",metrics.accuracy_score(T_test, T_pred))
+print("Precision:",metrics.precision_score(T_test, T_pred))
+print("Recall:",metrics.recall_score(T_test, T_pred))
