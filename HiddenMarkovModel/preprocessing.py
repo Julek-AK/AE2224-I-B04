@@ -29,3 +29,7 @@ csv["risk"] = csv["risk"].apply(lambda x: 0 if x < threshold else 1)
 
 # Print result
 print(csv)
+
+grouped_df = csv.groupby("event_id")["risk"].apply(list).reset_index()
+
+print(grouped_df)
