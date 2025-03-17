@@ -25,15 +25,17 @@ def readData ():
     for CDM in rawData:
         if j == event_counts[i]-1:
             for k in range(event_counts[i]-1):
-                t.append(CDM[1:3])
+                t.append(CDM[2])
             i += 1
             j = 0
         elif CDM[0] == event_IDs[i]:
             X.append(CDM[1:3])
             j +=1
 
+    np.savetxt("../DataSets/ProcessedData.txt", np.column_stack((X,t)), delimiter=",")
+
     return X,t 
-print(readData())
+
 
         
 
