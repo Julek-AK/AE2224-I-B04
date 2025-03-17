@@ -6,8 +6,8 @@ import numpy as np
 
 #data import 
 
-def readData ():
-    rawData = pd.read_csv("../DataSets/train_data.csv", usecols=[0,1,3])    
+def readData (data_type):
+    rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3])    
     rawData = rawData.to_numpy()
 
 #data collection, split up in input and output

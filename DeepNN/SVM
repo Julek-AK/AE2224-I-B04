@@ -1,9 +1,9 @@
 from sklearn import svm
 import DataReading as DR
-X,t = DR.readData()
+X,t = DR.readData("train")
 T = []
 for CDM in t:
-    if CDM[1]>-5:
+    if CDM>-5:
         T.append(1)
     else:
         T.append(0)
