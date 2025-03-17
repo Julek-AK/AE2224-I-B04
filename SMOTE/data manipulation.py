@@ -38,11 +38,8 @@ train_df, test_df = pandas_data_frame_creation()
 filtered_train_df = filter_by_risk(train_df, -4.0)
 sorted_train_df = sort_by_mission_id(filtered_train_df)
 cleaned_data = clean_data(sorted_train_df)
+print(cleaned_data.head(50))
 
-event_dict = create_event_dict(cleaned_data)
-example_event = next(iter(event_dict.keys()))  # Get any event_id
-print(f"Event ID: {37}")
-print(event_dict[37])
 
 
 #dictionary with key event id and a 2d np.array  (square) 
