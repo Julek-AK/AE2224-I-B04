@@ -1,0 +1,12 @@
+from sklearn import svm
+import DataReading as DR
+X,t = DR.readData()
+T = []
+for CDM in t:
+    if CDM[1]>-5:
+        T.append(1)
+    else:
+        T.append(0)
+print(T)
+clf = svm.SVC(kernel='linear') 
+clf.fit(X,T)
