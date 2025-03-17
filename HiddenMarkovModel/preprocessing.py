@@ -25,11 +25,7 @@ print(n_events)
 threshold = -6
 
 # Converts the risk entries into 0 and 1 regarding the risk
-for index in range(len(csv)):
-    if csv.loc[index, "risk"] < threshold:
-        csv.loc[index, "risk"] = 0
-    else:
-        csv.loc[index, "risk"] = 1
+csv["risk"] = csv["risk"].apply(lambda x: 0 if x < threshold else 1)
 
 # Print result
 print(csv)
