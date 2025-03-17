@@ -5,17 +5,21 @@ import matplotlib.pyplot as plt
 X, t = DR.readData("train")
 
 #Define Parameters
-n_hidden_neurons = 10
-n_epochs = 5000
+n_hidden_neurons = 40
+n_epochs = 100
+
+#Normalise data 
+
 
 #Define input to torch
 X = torch.tensor(X, dtype=torch.float)
 t = torch.tensor(t, dtype=torch.float).view(-1,1)
 
-model = torch.nn.Sequential(torch.nn.Linear(2, n_hidden_neurons), torch.nn.Sigmoid(), torch.nn.Linear(n_hidden_neurons,1))
+#10 hidden layers
+model = torch.nn.Sequential(torch.nn.Linear(2, n_hidden_neurons), torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,n_hidden_neurons), torch.nn.ReLU(), torch.nn.Linear(n_hidden_neurons,1))
 loss_fn = torch.nn.MSELoss(reduction="sum")
 
-learning_rate = 1e-5
+learning_rate = 1e-9
 optimiser = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 for i in range(n_epochs):
@@ -28,16 +32,11 @@ for i in range(n_epochs):
     loss.backward()
     optimiser.step()
 
+    print(y_pred)
+
 
 #Use the test data
 
-X_test, t_test = DR.readData("test")
-X_test = torch.tensor(X_test, dtype=torch.float)
-t_test = torch.tensor(t_test, dtype=torch.float).view(-1,1)
 
-y_pred = model(X_test)
-
-
-print(y_pred)
 
 

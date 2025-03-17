@@ -34,6 +34,7 @@ def readData (data_type):
 
     np.savetxt("../DataSets/ProcessedData.txt", np.column_stack((X,t)), delimiter=",")
 
+    #Maybe implement normalsing here
     return X,t 
 
 
