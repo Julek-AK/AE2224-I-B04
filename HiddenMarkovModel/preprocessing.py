@@ -1,8 +1,8 @@
 """
+Removes outliers, non-functional values and in general cleans the dataset.
 Converts CDM data into a string of 0 and 1 representing a sequence of whether the CDM
 labels the event collision risk as high or low.
 This will be later used to train the HMM
-
 """
 
 # External Imports
@@ -12,24 +12,59 @@ import numpy as np
 # Internal Imports
 ...
 
-csv = pd.read_csv(r"DataSets\train_data.csv")
-csv = csv.iloc[:, 0:4]
-print(csv)
 
 
-# Iterate over each event
-n_events = csv["event_id"].max()
-print(n_events)
+def cleanup(csv):
+    """
+    Removes all NaN values, as well as events with physically nonsensical parameters
+    Based on kesslerlib, https://github.com/kesslerlib/kessler 
+    """
 
-# Setting up threshold for high/low risk events
-threshold = -6
+    original_length = len(csv)
+    print(f"Starting with {original_length} entries.")
+    print("Removing invalid values")
 
-# Converts the risk entries into 0 and 1 regarding the risk
-for index in range(len(csv)):
-    if csv.loc[index, "risk"] < threshold:
-        csv.loc[index, "risk"] = 0
+    # Remove NaN values
+    csv = csv.dropna()
+
+    # Remove outliers
+    # outlier_features = ['t_sigma_r', 't_sigma_t', 't_sigma_n', 't_sigma_rdot', 't_sigma_tdot', 't_sigma_ndot']
+    csv = csv[csv['t_sigma_r'] <= 20]
+    csv = csv[csv['c_sigma_r'] <= 1000]
+    csv = csv[csv['t_sigma_t'] <= 2000]
+    csv = csv[csv['c_sigma_t'] <= 100000]
+    csv = csv[csv['t_sigma_n'] <= 10]
+    csv = csv[csv['c_sigma_n'] <= 450]
+
+    final_length = len(csv)
+    print(f"Remaining entries: {final_length}, which is {final_length/original_length:.3g} of the original.")
+    return csv
+
+
+def convert_to_binary_risk(row, risk_threshhold=-7):
+    if row['risk'] > risk_threshhold:
+        return 1
     else:
-        csv.loc[index, "risk"] = 1
+        return 0
 
-# Print result
-print(csv)
+
+
+
+if __name__ == '__main__':
+    csv = pd.read_csv(r"DataSets\train_data.csv")
+
+    csv = cleanup(csv)
+
+    # Additional removals
+    csv = csv[csv['risk'] != -30]
+
+    # Cut un-needed columns
+    csv = csv.iloc[:, :4]
+    
+    # Converts the risk entries into 0 and 1 regarding the risk
+    threshold = -6
+    csv["risk"] = csv["risk"].apply(lambda x: 0 if x < threshold else 1)
+
+    # Print result
+    print(csv)
+
