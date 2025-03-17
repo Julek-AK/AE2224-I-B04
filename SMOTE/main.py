@@ -22,4 +22,4 @@ filtered_train_df = filter_by_risk(train_df, -4.0)
 
 sorted_train_df = sort_by_mission_id(filtered_train_df)
 
-print(sorted_train_df.head(50))
+print(sorted_train_df.head(50)) 
