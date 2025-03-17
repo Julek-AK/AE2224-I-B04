@@ -2,15 +2,16 @@ import DataReading as DR
 import torch 
 import numpy as np
 import matplotlib.pyplot as plt
-X, t = DR.readData()
+X, t = DR.readData("train")
 
 #Define Parameters
 n_hidden_neurons = 10
 n_epochs = 5000
 
 #Define input to torch
-X = torch.tensor(X).float()
-t = torch.tensor(t).float()
+X = torch.tensor(X)
+t = torch.tensor(t)
+
 
 
 
