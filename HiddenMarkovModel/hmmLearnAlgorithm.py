@@ -5,9 +5,9 @@ lengths = []
 
 observations = [np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1),
                 np.array([0, 0, 0, 0, 0, 0]).reshape(-1, 1),
-                np.array([1, 0, 0, 0, 0, 0]).reshape(-1, 1),
-                np.array([0, 1, 1, 1, 1, 1]).reshape(-1, 1),
-                np.array([0, 1, 0, 0, 0, 0]).reshape(-1, 1),
+                np.array([0, 0, 1, 1, 1, 0]).reshape(-1, 1),
+                np.array([0, 0, 0, 1, 1, 1]).reshape(-1, 1),
+                np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1),
                 np.array([1, 1, 1, 1, 1, 1]).reshape(-1, 1)]
 
 print(len(observations[0]))
@@ -23,8 +23,10 @@ def idealPrediction(observations, lengths):
     models = list()
     scores = list()
     #tests a few random starts to find the global maximum
-    for idx in range (10):
-        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=20)
+    # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
+    for idx in range (100):
+        #iteration number can also be increased for a lower likelyhood of being stuck
+        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=40)
         model.fit(observations, lengths)
         models.append(model)
         scores.append(model.score(observations, lengths))
@@ -33,12 +35,25 @@ def idealPrediction(observations, lengths):
         print(f'The best model had a score of {max(scores)}')
     return models[np.argmax(scores)]
 
-model = idealPrediction(squishedObservations, lengths)
+model1 = idealPrediction(squishedObservations, lengths)
 
-states = model.predict(observations[5])
+
+currentObservation = observations[0]
+
+states = model1.predict(currentObservation)
 
 print(states)
-print(f'after: {model.transmat_}')
+print(f'after: {model1.transmat_}')
+
+def predictNext(model, observations):
+    transMatrix = model.transmat_
+    prediction = model.predict(observations)
+
+    return np.argmax(transMatrix[prediction[-1]])
+
+print(predictNext(model1, currentObservation))
+
+
 
 
 
