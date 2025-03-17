@@ -8,8 +8,10 @@ n_hidden_neurons = 10
 n_epochs = 5000
 
 #Define input to torch
-X = torch.tensor(X)
-t = torch.tensor(t)
+X = torch.tensor(X).float()
+t = torch.tensor(t).float()
+
+
 
 model = torch.nn.Sequential(torch.nn.Linear(2, n_hidden_neurons), torch.nn.Sigmoid(), torch.nn.Linear(n_hidden_neurons, 1))
 loss_fn = torch.nn.MSELoss(reduction="sum")
@@ -19,4 +21,4 @@ optimiser = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 for t in range(n_epochs):
     y_pred = model(X)
-
+    

@@ -35,7 +35,7 @@ def readData ():
     np.savetxt("../DataSets/ProcessedData.txt", np.column_stack((X,t)), delimiter=",")
 
     return X,t 
-print(readData())
+
 
         
 
