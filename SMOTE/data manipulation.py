@@ -27,4 +27,6 @@ filtered_train_df = filter_by_risk(train_df, -4.0)
 sorted_train_df = sort_by_mission_id(filtered_train_df)
 cleaned_data = clean_data(sorted_train_df)
 
-print(len(cleaned_data))
+print(cleaned_data[['event_id', 't_sigma_r', 'risk']].head(50))
+
+#print(cleaned_data.head(50))
