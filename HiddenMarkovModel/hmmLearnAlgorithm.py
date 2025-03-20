@@ -64,7 +64,7 @@ def predictNext(model, observations, steps = 1):
     prediction = model.predict(observations)[-1]
     nextSequence = []
 
-    print(f'Pred: {prediction}')
+    # print(f'Pred: {prediction}')
     # print(transMatrix)
     if int(steps) != steps:
         print("Imput value steps must be an integer")
@@ -79,16 +79,11 @@ def predictNext(model, observations, steps = 1):
             return nextSequence
         
         else:
-            # np.random.choice(np.arange(0, 2, 1), p=[])
+            # predicts the next element randomly based on the transition probability
             nextSequence.append(np.random.choice(np.arange(0, 2, 1), p=[transMatrix[prediction][0], transMatrix[prediction][1]]))
-            print([transMatrix[prediction][0], transMatrix[prediction][1]])
-            print(nextSequence[-1])
+            # print([transMatrix[prediction][0], transMatrix[prediction][1]])
+            # print(nextSequence[-1])
         steps -= 1
 
 #print(f'observation predicting: {observations[1]}')
 print(f'next prediction: {predictNext(model1, test, 6)}')
-
-
-
-
-
