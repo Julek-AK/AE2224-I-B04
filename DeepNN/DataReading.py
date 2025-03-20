@@ -37,3 +37,27 @@ def readData(data_type):
     #Maybe implement normalsing here
     return X,t 
 
+
+        
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+    
+           
+    
+
+
+
+
+

@@ -1,5 +1,8 @@
 from sklearn import svm
 from sklearn import metrics
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import DataReading as DR
 X_train,t_train = DR.readData("train")
 X_test,t_test = DR.readData("test")
@@ -13,7 +16,8 @@ def classify(t):
   return T
 T_train = classify(t_train)
 T_test = classify(t_test)
-clf = svm.SVC(kernel='linear') 
+clf = make_pipeline(StandardScaler(),svm.SVC(kernel='rbf', class_weight='balanced', C=1.0, gamma='auto'))
+svm.SVC(kernel='rbf', class_weight='balanced', C=1.0, gamma='auto', max_iter=5000) 
 clf.fit(X_train,T_train)
 T_pred = clf.predict(X_test)
 print("Accuracy:",metrics.accuracy_score(T_test, T_pred))
