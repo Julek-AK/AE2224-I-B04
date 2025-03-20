@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tslearn.clustering import TimeSeriesKMeans
+from tslearn.clustering import TimeSeriesDBA
 import warnings
 # Suppress FutureWarnings from sklearn
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -137,58 +138,49 @@ def cluster_high_risk_events(data, num_clusters):
     # Convert lists to NumPy arrays
     clustered_events = {k: np.array(v) for k, v in clustered_events.items()}
     
-    return clustered_events
+    return kmeans_dtw, clustered_events
+
+def apply_dba_to_centroids(kmeans_model, data):
+    """
+    Apply DBA to the centroids of the k-means model to improve the centroids using DTW averaging.
+    """
+    # Extract the centroids of the clusters from the KMeans model
+    centroids = kmeans_model.cluster_centers_
+
+    # Apply DBA to the centroids
+    dba = TimeSeriesDBA(n_iter=10)  # Apply 10 iterations of DBA to improve centroids
+    dba.fit(data)
+
+    # Get the DBA-averaged centroids
+    improved_centroids = dba.cluster_centers_
+
+    return improved_centroids
 
 # Example high-risk events dataset
-
 high_risk_events = np.array([
-    # Cluster 0: Flat sequences
     [0.5, 0.5, 0.5, 0.5, 0.5, 0.5],  
     [0.6, 0.6, 0.6, 0.6, 0.6, 0.6],  
     [0.4, 0.4, 0.4, 0.4, 0.4, 0.4],  
-
-    # Cluster 1: Steady decrease
     [1.0, 0.9, 0.8, 0.7, 0.6, 0.5],  
     [0.9, 0.8, 0.7, 0.6, 0.5, 0.4],  
     [0.8, 0.7, 0.6, 0.5, 0.4, 0.3],  
-
-    # Cluster 2: Oscillating values
     [1.0, 0.5, 1.0, 0.5, 1.0, 0.5],  
     [0.9, 0.4, 0.9, 0.4, 0.9, 0.4],  
     [0.8, 0.3, 0.8, 0.3, 0.8, 0.3],  
 ])
 
-""""
-different test set
-high_risk_events = np.array([
-    # Category 0: constant near -30
-    [-30, -30, -30, -30, -30, -30],
-    [-29, -30, -29, -30, -29, -30],
-    [-30, -30, -29, -30, -30, -29],
-
-    # Category 1: ramp from -30 to -10
-    [-30, -26, -22, -18, -14, -10],
-    [-29, -25, -21, -17, -13, -10],
-    [-30, -27, -24, -18, -15, -10],
-
-    # Category 2: ramp from -25 to -2
-    [-25, -21, -16, -11, -7,  -2],
-    [-26, -20, -15, -10, -6,  -2],
-    [-25, -22, -17, -12, -8,  -2],
-
-    # Category 3: oscillation between -30 and -10
-    [-30, -10, -30, -10, -30, -10],
-    [-29, -10, -29, -10, -29, -10],
-    [-30, -11, -30, -11, -30, -11],
-])
-"""
-
-print("New dataset shape:", high_risk_events.shape)
-
 # Step 1: Run elbow method to get best k
 optimal_k = find_optimal_k(high_risk_events)
 
-# Step 2: Cluster events using the optimal k
-clustered_events = cluster_high_risk_events(high_risk_events, optimal_k)
-print(clustered_events)
+# Step 2: Cluster events using the optimal k and get the KMeans model
+kmeans_dtw, clustered_events = cluster_high_risk_events(high_risk_events, optimal_k)
 
+# Step 3: Apply DBA to improve the centroids and plot
+improved_centroids = apply_dba_to_centroids(kmeans_dtw, high_risk_events)
+
+# Plot the improved centroids
+for i, centroid in enumerate(improved_centroids):
+    plt.plot(centroid.ravel(), label=f'Improved Centroid {i}')
+plt.legend()
+plt.title("DBA Improved Centroids")
+plt.show()
