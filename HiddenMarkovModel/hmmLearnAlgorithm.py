@@ -62,7 +62,7 @@ def predictNext(model, observations, steps = 1):
     transMatrix = model.transmat_
     # We only care about the last value in hidden
     prediction = model.predict(observations)[-1]
-    nextSequence = list()
+    nextSequence = []
 
     print(f'Pred: {prediction}')
     # print(transMatrix)
@@ -71,8 +71,11 @@ def predictNext(model, observations, steps = 1):
         raise TypeError
     while steps >= 1:
         if steps == 1:
-            # choose the highest probability
-            nextSequence.append(np.argmax(transMatrix[prediction]))
+            if len(nextSequence) == 0:
+                # choose the highest probability
+                nextSequence.append(np.argmax(transMatrix[prediction]))
+            else:
+                nextSequence.append(np.argmax(transMatrix[nextSequence[-1]]))
             return nextSequence
         
         else:
