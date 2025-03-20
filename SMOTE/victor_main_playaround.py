@@ -1,5 +1,5 @@
 from Data_Manager import Data_Manager
 
-train_data = self.load_data("DataSets/train_data.csv")
-
-print(train_data)
+df = Data_Manager(train_file = "DataSets/train_data.csv", test_file="DataSets/test_data.csv")
+train_df = df.load_data()
+print(train_df)

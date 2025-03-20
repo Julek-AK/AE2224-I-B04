@@ -9,10 +9,11 @@ class Data_Manager:
         self.test_df = None
 
     def load_data(self):
-        self.train.df = pd.read_csv(self.train_file)
+        self.train_df = pd.read_csv(self.train_file)
+        self.test_df = pd.read_csv(self.test_file)
     
     def filter_by_risk(self,risk_threshold):
-        event_ids_to_keep = self.train_df.groupby('event_id')['risk'].max() <= risk_threshold
+        event_ids_to_keep = self.train_df.groupby('event_id')['risk'].max() > risk_threshold
         valid_event_ids = event_ids_to_keep[event_ids_to_keep].index
         self.train_df = self.train_df[self.train_df['event_id'].isin(valid_event_ids)]
         
