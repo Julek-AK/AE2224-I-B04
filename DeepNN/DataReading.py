@@ -32,4 +32,7 @@ def readData (data_type):
             X.append(CDM[1:3])
             j +=1
 
+    np.savetxt("../DataSets/ProcessedData.txt", np.column_stack((X,t)), delimiter=",")
+
+    #Maybe implement normalsing here
     return X,t 
