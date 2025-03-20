@@ -27,7 +27,7 @@ def MSE(T_test,T_pred):
     N = 0
     for i in range(len(T_test)):
       if T_test[i] == 1 and T_pred[i] == 0:
-        sum += (10**(t_test[i])-10**(-6))**2
+        sum += (t_test[i]+6)**2
         N += 1
     return sum/N
 print("MSE:",MSE(T_test,T_pred))
