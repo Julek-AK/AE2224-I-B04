@@ -22,7 +22,7 @@ def Interpolate_(eventlist, points,accuracy=500, scaling=1):
         output_TCA = np.linspace(min(TCA),max(TCA), points)
         output_Pc = interpolant(output_TCA)
     
-        results.append(np.array([output_Pc,output_TCA]))
+        results.append(np.array([output_Pc]))
         #print(output_TCA, output_Pc)
 
         '''
