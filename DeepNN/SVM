@@ -16,10 +16,22 @@ def classify(t):
   return T
 T_train = classify(t_train)
 T_test = classify(t_test)
-clf = make_pipeline(StandardScaler(),svm.SVC(kernel='rbf', class_weight='balanced', C=1.0, gamma='auto'))
-svm.SVC(kernel='rbf', class_weight='balanced', C=1.0, gamma='auto', max_iter=5000) 
+clf = make_pipeline(StandardScaler(),svm.SVC(kernel='rbf', class_weight='balanced', C=1.0, gamma='auto',))
 clf.fit(X_train,T_train)
 T_pred = clf.predict(X_test)
 print("Accuracy:",metrics.accuracy_score(T_test, T_pred))
 print("Precision:",metrics.precision_score(T_test, T_pred))
 print("Recall:",metrics.recall_score(T_test, T_pred))
+def MSE(T_test,T_pred):
+    sum = 0
+    N = 0
+    for i in range(len(T_test)):
+      if T_test[i] == 1 and T_pred[i] == 0:
+        sum += (10**(t_test[i])-10**(-6))**2
+        N += 1
+    return sum/N
+print("MSE:",MSE(T_test,T_pred))
+def Score(MSE,precision,recall):
+  F = (1+2**2)*precision*recall/(2**2*precision+recall)
+  return MSE/F
+print("Score:",Score(MSE(T_test,T_pred),metrics.precision_score(T_test, T_pred),metrics.recall_score(T_test, T_pred)))
