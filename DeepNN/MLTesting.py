@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from NNParameters import model, loss_fn
+from sklearn.preprocessing import StandardScaler
 
 
 
@@ -22,6 +23,15 @@ loss = loss_fn(y_pred,t)
 print(loss)
 
 y_pred = model(X).detach().numpy()
+
+#Denormalise
+t = DR.readData("test")[1]
+scaler = StandardScaler()
+scaler = scaler.fit(np.array(t).reshape(-1,1))
+y_pred = scaler.inverse_transform(y_pred.reshape(-1,1))
+y_pred = y_pred.reshape(-1)
+
+
 
 np.savetxt("../DataSets/OutPutProbability.txt", np.column_stack((t, y_pred)), delimiter=",")
 
