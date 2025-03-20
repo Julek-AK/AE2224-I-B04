@@ -40,7 +40,7 @@ def cleanup(csv):
     return csv
 
 
-if __name__ == '__main__':
+def generate_hmm_data(verbose=False):
     csv = pd.read_csv(r"DataSets\train_data.csv")
 
     csv = cleanup(csv)
@@ -60,7 +60,8 @@ if __name__ == '__main__':
     # print(csv)
 
     n_events = csv['event_id'].nunique()
-    print(f"There are {n_events} events to process")
+    if verbose:
+        print(f"There are {n_events} events to process")
 
     # max_n_cdms = csv['event_id'].value_counts().max()
     # print(f"Longest cdm string: {max_n_cdms}")
@@ -74,11 +75,14 @@ if __name__ == '__main__':
     # print(csv[csv['event_id'] == 12779])
 
     # Prepare output DataFrame
-    data = pd.DataFrame(columns=['event_id', 'observation', 'outcome'])
+    data = pd.DataFrame(columns=['event_id', 'observations', 'outcome'])
 
 
     for event_id, df in csv.groupby('event_id'):
-        print(f"Processing event {event_id}")
+        if verbose:
+            print(f"Processing event {event_id}")
+
+        df.sort_values(by='time_to_tca', ascending=False, inplace=True)
         
         observations = df[df['time_to_tca'] > 2]
         predictions = df[df['time_to_tca'] < 2]
@@ -86,9 +90,10 @@ if __name__ == '__main__':
         n_obsv = len(observations)
         n_pred = len(predictions)
 
-        # Remove events with not enough data
+        # Remove events with lacking data
         if n_obsv == 0 or n_pred == 0:
-            print("insufficient CDMs")
+            if verbose:
+                print("insufficient CDMs")
             continue
         
         # Prepare risk sequence based on number of observation CDMs
@@ -119,11 +124,26 @@ if __name__ == '__main__':
                 if risk_sequence[i] is None:
                     risk_sequence[i] = risk_sequence[i-1]
 
-            raise NotImplementedError
+            # Pad-right
+            for i in range(2, 16):
+                if risk_sequence[-i] is None:
+                    risk_sequence[-i] = risk_sequence[-i+1]
             
-        else:
-            continue
+        risk_sequence = tuple(risk_sequence)
 
-        # print(len(risk_sequence))
+        # Prepare the data used for predicting
+        predictions = predictions['risk'].tolist()
+        first_prediction = predictions[0]
+        final_state = predictions[-1]
+        prediction = (first_prediction, final_state)
+
+        # Add to the dataset
+        new_row = pd.DataFrame([{'event_id': event_id, 'observations': risk_sequence, 'outcome': prediction}])
+        data = pd.concat([data, new_row], ignore_index=True)
+
+    data.to_csv("./DataSets/HMM_train_data.csv")
+    print("Data saved as HMM_train_data.csv")
             
-        
+
+if __name__ == '__main__':
+    generate_hmm_data()
