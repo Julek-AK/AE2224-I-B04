@@ -72,4 +72,3 @@ def readData2(data_type):
 
     #Maybe implement normalsing here
     return X,t 
-print(readData2("train")[0])
