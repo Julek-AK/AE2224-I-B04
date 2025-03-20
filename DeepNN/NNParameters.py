@@ -2,6 +2,7 @@ import torch
 
 
 n_hidden_neurons = 10
+n_epochs = 1000
 
 #10 hidden layers
 model = torch.nn.Sequential(torch.nn.Linear(2, n_hidden_neurons), 

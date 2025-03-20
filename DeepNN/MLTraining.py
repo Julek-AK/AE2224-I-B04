@@ -2,16 +2,14 @@ import DataReading as DR
 import torch 
 import numpy as np
 import matplotlib.pyplot as plt
-from NNParameters import model, loss_fn, n_hidden_neurons, learning_rate
+from NNParameters import model, loss_fn, n_epochs, learning_rate
 from sklearn.preprocessing import StandardScaler
-X, t = DR.readData("train")
 
-#Define Parameters
-n_epochs = 1000
+
+X, t = DR.readData("train")
 
 #Normalise data 
 scaler = StandardScaler()
-
 X = scaler.fit_transform(X)
 t = scaler.fit_transform(np.array(t).reshape(-1,1)).flatten()
 
