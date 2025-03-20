@@ -1,5 +1,6 @@
 import torch
 
+
 n_hidden_neurons = 10
 
 #10 hidden layers

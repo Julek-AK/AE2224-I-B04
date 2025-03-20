@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from NNParameters import model, loss_fn
 
 
-
 model.load_state_dict(torch.load("Trained_MLModel.pth"))
 model.eval()
 
