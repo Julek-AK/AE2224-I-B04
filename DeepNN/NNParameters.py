@@ -1,28 +1,9 @@
 import torch
 
-n_hidden_neurons = 80
+n_hidden_neurons = 10
 
-#20 hidden layers
+#10 hidden layers
 model = torch.nn.Sequential(torch.nn.Linear(2, n_hidden_neurons), 
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(), 
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
-                            torch.nn.ReLU(),
                             torch.nn.ReLU(),
                             torch.nn.Linear(n_hidden_neurons,n_hidden_neurons),
                             torch.nn.ReLU(), 
