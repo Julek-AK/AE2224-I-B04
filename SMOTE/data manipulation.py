@@ -1,6 +1,7 @@
 import pandas as pd
 import scipy
 import numpy as np
+from formatting_and_interpolation import Interpolate_
 
 
 def pandas_data_frame_creation ():
@@ -40,8 +41,6 @@ sorted_train_df = sort_by_mission_id(filtered_train_df)
 cleaned_data = clean_data(sorted_train_df)
 dictionary_for_benjamin = create_event_dict(cleaned_data)
 print(cleaned_data.head(50))
-print(len(cleaned_data))
 
-
-
-#dictionary with key event id and a 2d np.array  (square) 
+alpha = Interpolate_(dictionary_for_benjamin, 10)
+print(alpha)
