@@ -25,7 +25,7 @@ print(loss)
 y_pred = model(X).detach().numpy()
 
 #Denormalise
-t = DR.readData("test")[1]
+t = DR.readData2("test")[1]
 scaler = StandardScaler()
 scaler = scaler.fit(np.array(t).reshape(-1,1))
 y_pred = scaler.inverse_transform(y_pred.reshape(-1,1))

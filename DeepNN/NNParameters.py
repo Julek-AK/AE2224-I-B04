@@ -1,7 +1,7 @@
 import torch
 
 
-n_hidden_neurons = 200
+n_hidden_neurons = 10
 n_epochs = 1000
 loss_fn = torch.nn.MSELoss(reduction="sum")
 
