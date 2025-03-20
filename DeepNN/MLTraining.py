@@ -6,7 +6,7 @@ from NNParameters import model, loss_fn, n_epochs, learning_rate
 from sklearn.preprocessing import StandardScaler
 
 
-X, t = DR.readData("train")
+X, t = DR.readData2("train")
 
 #Normalise data 
 scaler = StandardScaler()
