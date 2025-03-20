@@ -56,15 +56,17 @@ for i in range(1,len(events)+1):
     output_TCA = np.linspace(min(TCA),max(TCA), points)
     output_Pc = interpolant(output_TCA)
     #print(output_TCA, output_Pc)
+
     
-    plt.plot(TCA, Pc, 'o', label = 'data')                              #original data points visualization
-    #plt.plot(x,y,'o', label= 'interpolant1')                            #individual data points visualization
-    plt.plot(x,y,'-', label= 'interpolant')                             #interpolant visualization
-    plt.plot(output_TCA, output_Pc, 'o', label= 'output')               #output visualization
-    plt.gca().invert_xaxis()
-    plt.legend()
-    plt.title('Interpolant')
-    plt.xlabel('TCA')
-    plt.ylabel('Pc')
-    plt.show()
+plt.subplot(121)    
+plt.plot(TCA, Pc, 'o', label = 'data')                              #original data points visualization
+#plt.plot(x,y,'o', label= 'interpolant1')                            #individual data points visualization
+plt.plot(x,y,'-', label= 'interpolant')                             #interpolant visualization
+plt.plot(output_TCA, output_Pc, 'o', label= 'output')               #output visualization
+plt.gca().invert_xaxis()
+plt.legend()
+plt.title('Interpolant')
+plt.xlabel('TCA')
+plt.ylabel('Pc')
+#plt.show()
 
