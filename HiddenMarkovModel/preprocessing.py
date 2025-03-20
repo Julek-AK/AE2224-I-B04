@@ -40,9 +40,21 @@ def cleanup(csv):
     return csv
 
 
-def generate_hmm_data(verbose=False):
-    csv = pd.read_csv(r"DataSets\train_data.csv")
+def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
+    """
+    Processes the raw dataset into a format accepted by hidden markov models
+    the resulting dataframe has columns:
 
+    event_id: same identifier as in original data
+
+    observations: a tuple of 15 values (3 per day, up until 2 days before TCA), 0 refers to low risk, and 1 to high risk of collision
+    if event_id has too many CDMs, the oldest ones are removed, if there are too few CDMs, new datapoints are padded until 15
+
+    outcome: a tuple of two values. The first one is the risk state in the next CDM after the 2 day cut-off. The second value is the final
+    risk state in the CDM closest to TCA
+    """
+
+    csv = pd.read_csv(f"DataSets\{filename}")
     csv = cleanup(csv)
 
     # Additional cleanups
@@ -53,11 +65,8 @@ def generate_hmm_data(verbose=False):
     csv = csv.drop_duplicates()
     
     # Converts the risk entries into binary determinator of high/low risk
-    threshold = -6
-    csv['risk'] = csv['risk'].apply(lambda x: 0 if x < threshold else 1)
+    csv['risk'] = csv['risk'].apply(lambda x: 0 if x < risk_threshold else 1)
 
-    # Print result
-    # print(csv)
 
     n_events = csv['event_id'].nunique()
     if verbose:
@@ -141,9 +150,10 @@ def generate_hmm_data(verbose=False):
         new_row = pd.DataFrame([{'event_id': event_id, 'observations': risk_sequence, 'outcome': prediction}])
         data = pd.concat([data, new_row], ignore_index=True)
 
-    data.to_csv("./DataSets/HMM_train_data.csv")
-    print("Data saved as HMM_train_data.csv")
+    data.to_csv(f"./DataSets/HMM_{filename}")
+    print(f"Data saved as HMM_{filename}")
             
 
 if __name__ == '__main__':
-    generate_hmm_data()
+    generate_hmm_data("train_data.csv")
+    generate_hmm_data("test_data.csv")
