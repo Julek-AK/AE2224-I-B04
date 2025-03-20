@@ -6,7 +6,7 @@ import numpy as np
 
 #data import 
 
-def readData (data_type):
+def readData(data_type):
     rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3])    
     rawData = rawData.to_numpy()
 
@@ -36,28 +36,4 @@ def readData (data_type):
 
     #Maybe implement normalsing here
     return X,t 
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-    
-           
-    
-
-
-
-
 
