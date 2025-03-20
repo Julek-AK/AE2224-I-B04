@@ -57,7 +57,6 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
     # TODO make work for test data
     if filename == "test_data.csv":
         raise NotImplementedError("test data doesn't contain predictions, this is yet to be implemented")
-    # TODO remove entries where final observation is -30
 
     csv = pd.read_csv(f"DataSets\{filename}")
     csv = cleanup(csv)
@@ -69,47 +68,40 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
     csv = csv.iloc[:, :4]
     csv = csv.drop_duplicates()
     
-    # Converts the risk entries into binary determinator of high/low risk
-    csv['risk'] = csv['risk'].apply(lambda x: 0 if x < risk_threshold else 1)
-
-
     n_events = csv['event_id'].nunique()
     if verbose:
         print(f"There are {n_events} events to process")
 
-    # max_n_cdms = csv['event_id'].value_counts().max()
-    # print(f"Longest cdm string: {max_n_cdms}")
-    # print(csv[csv["event_id"] == csv["event_id"].value_counts().idxmax()])
-
-    # min_n_cdms = csv['event_id'].value_counts().min()
-    # print(f"Shortest cdm string: {min_n_cdms}")
-    # print(csv[csv["event_id"] == csv["event_id"].value_counts().idxmin()])
-
-    # Preview specific event
-    # print(csv[csv['event_id'] == 12779])
-
     # Prepare output DataFrame
     data = pd.DataFrame(columns=['event_id', 'observations', 'outcome'])
 
-
+    # Generate a data line for each event
     for event_id, df in csv.groupby('event_id'):
         if verbose:
             print(f"Processing event {event_id}")
 
         df.sort_values(by='time_to_tca', ascending=False, inplace=True)
-        
+
+        # Remove events with final collision risk of -30
+        if all(df['risk'] == -30):
+            print("worked!")
+            continue
+
+        # Converts the risk entries into binary determinator of high/low risk
+        df['risk'] = df['risk'].apply(lambda x: 0 if x < risk_threshold else 1)
+
+        # Split into observations and predictions based on competition requirement
         observations = df[df['time_to_tca'] > 2]
         predictions = df[df['time_to_tca'] < 2]
 
+        # Remove events with lacking data
         n_obsv = len(observations)
         n_pred = len(predictions)
-
-        # Remove events with lacking data
         if n_obsv == 0 or n_pred == 0:
             if verbose:
                 print("insufficient CDMs")
             continue
-        
+   
         # Prepare risk sequence based on number of observation CDMs
         if n_obsv > 15:
             risks = observations['risk'].tolist()
@@ -160,5 +152,5 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
             
 
 if __name__ == '__main__':
-    # generate_hmm_data("train_data.csv")
-    generate_hmm_data("test_data.csv", verbose=True)
+    generate_hmm_data("train_data.csv")
+    # generate_hmm_data("test_data.csv", verbose=True)
