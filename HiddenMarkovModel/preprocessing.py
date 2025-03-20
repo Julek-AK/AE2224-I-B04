@@ -40,7 +40,7 @@ def cleanup(csv):
     return csv
 
 
-def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
+def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=False):
     """
     Processes the raw dataset into a format accepted by hidden markov models
     the resulting dataframe has columns:
@@ -53,6 +53,11 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
     outcome: a tuple of two values. The first one is the risk state in the next CDM after the 2 day cut-off. The second value is the final
     risk state in the CDM closest to TCA
     """
+
+    # TODO make work for test data
+    if filename == "test_data.csv":
+        raise NotImplementedError("test data doesn't contain predictions, this is yet to be implemented")
+    # TODO remove entries where final observation is -30
 
     csv = pd.read_csv(f"DataSets\{filename}")
     csv = cleanup(csv)
@@ -155,5 +160,5 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
             
 
 if __name__ == '__main__':
-    generate_hmm_data("train_data.csv")
-    generate_hmm_data("test_data.csv")
+    # generate_hmm_data("train_data.csv")
+    generate_hmm_data("test_data.csv", verbose=True)
