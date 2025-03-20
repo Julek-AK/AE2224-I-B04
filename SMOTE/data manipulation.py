@@ -2,6 +2,7 @@ import pandas as pd
 import scipy
 import numpy as np
 from formatting_and_interpolation import Interpolate_
+from DTW_elbow import find_optimal_k, cluster_high_risk_events
 
 
 def pandas_data_frame_creation ():
@@ -42,5 +43,7 @@ cleaned_data = clean_data(sorted_train_df)
 dictionary_for_benjamin = create_event_dict(cleaned_data)
 print(cleaned_data.head(50))
 
-alpha = Interpolate_(dictionary_for_benjamin, 10)
-print(alpha)
+event_dict = Interpolate_(dictionary_for_benjamin, 100)
+optimal_k = find_optimal_k(event_dict, drop_threshold=10)
+clustered_events = cluster_high_risk_events(event_dict, optimal_k)
+print(clustered_events)
