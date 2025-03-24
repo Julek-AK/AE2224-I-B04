@@ -5,12 +5,15 @@ import matplotlib.pyplot as plt
 from NNParameters import model, loss_fn
 from sklearn.preprocessing import StandardScaler
 
-
-
 model.load_state_dict(torch.load("Trained_MLModel.pth"))
 model.eval()
 
-X,t = DR.readData("test")
+X,t = DR.readData2("test")
+
+#Normalise data 
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+t = scaler.fit_transform(np.array(t).reshape(-1,1)).flatten()
 
 X = torch.tensor(X, dtype=torch.float)
 t = torch.tensor(t, dtype=torch.float).view(-1,1)
