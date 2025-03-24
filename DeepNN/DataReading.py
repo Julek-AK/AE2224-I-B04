@@ -54,7 +54,7 @@ def readData2(data_type):
 
     i  = 0
     j = 0
-    OA = np.array[]
+    OA = np.array([])
     for CDM in OA_data:
         if abs(CDM[0] - CDM[1]) < abs(CDM[1]-CDM[0]):
             OA = np.array(CDM[0] - CDM[1])
@@ -62,10 +62,6 @@ def readData2(data_type):
             OA = np.array(180)
         
         
-            
-                
-
-
 
     OA = np.array([CDM[0] - CDM[1] for CDM in OA_data])
 
