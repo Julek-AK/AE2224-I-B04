@@ -8,8 +8,9 @@ def main():
     print("Preprocessing complete.")
     print("Train Array shape:", train_array.shape)
     print("Test Array shape:", test_array.shape)
-    print("Event dict keys:", list(event_dict.keys()))
     plot_cdm_counts(event_dict, plot_type="histogram")
+    num_events = len(event_dict)
+    print(f"Number of events: {num_events}")
 
 if __name__ == '__main__':
     main()
