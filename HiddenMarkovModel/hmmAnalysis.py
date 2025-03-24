@@ -1,5 +1,4 @@
 import numpy as np
-from hmmlearn import hmm
 from hmmLearnAlgorithm import idealPrediction, predictNext
 from splitData import splitSet, formatData
 
