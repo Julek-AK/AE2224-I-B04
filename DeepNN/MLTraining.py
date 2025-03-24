@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from NNParameters import model, loss_fn, n_epochs, learning_rate
 from sklearn.preprocessing import StandardScaler
 
+#Check if cuda device available 
+computationDevice = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 X, t = DR.readData2("train")
 
@@ -16,6 +18,12 @@ t = scaler.fit_transform(np.array(t).reshape(-1,1)).flatten()
 #Define input to torch
 X = torch.tensor(X, dtype=torch.float)
 t = torch.tensor(t, dtype=torch.float).view(-1,1)
+
+#Initialise cuda
+X = X.to(device=computationDevice)
+t = t.to(device=computationDevice)
+model = model.to(device=computationDevice)
+
 
 optimiser = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
