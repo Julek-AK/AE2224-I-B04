@@ -24,7 +24,7 @@ def cleanup(csv):
     print("Removing invalid values")
 
     # Remove NaN values
-    csv = csv.dropna()
+    csv.dropna(inplace=True)
 
     # Remove outliers
     # outlier_features = ['t_sigma_r', 't_sigma_t', 't_sigma_n', 't_sigma_rdot', 't_sigma_tdot', 't_sigma_ndot']
@@ -118,7 +118,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
             # Distribute known datapoints amongst the 15 required CDMs
             risk_sequence = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
             for risk, time in zip(risks, times):
-                i = (6 - int(np.floor(time)))*3
+                i = (6 - np.floor(time))*3
                 while i < 15:
                     if risk_sequence[i] is None:
                         risk_sequence[i] = risk
