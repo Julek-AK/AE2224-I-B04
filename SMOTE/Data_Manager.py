@@ -13,7 +13,7 @@ class Data_Manager:
     def load_data(self):
         self.train_df = pd.read_csv(self.train_file)
         self.test_df = pd.read_csv(self.test_file)
-    
+
     def filter_by_risk(self,risk_threshold):
         event_ids_to_keep = self.train_df.groupby('event_id')['risk'].max() > risk_threshold
         valid_event_ids = event_ids_to_keep[event_ids_to_keep].index
@@ -45,9 +45,25 @@ class Data_Manager:
             for event_id, group in self.train_df.groupby('event_id')
         }
         return event_dict
-    def df_to_numpy():
-        self.train_np = self.train_df.to_numpy()
-        self.test_np = self.test_df.to_numpy()
-        
+    
 
+    def data_frame_to_numpy(self):
+        # Use .iloc[1:] to skip the first row of the DataFrame.
+        self.train_np = self.train_df.iloc[1:].to_numpy()
+        self.test_np = self.test_df.iloc[1:].to_numpy()
+        return self.train_np, self.test_np
+    
+    def run_pre_processing(self, risk_threshold):
+        self.load_data()
+        self.clean_data()
+        self.sort_by_event_id_time_to_tca()
+        self.filter_by_risk(risk_threshold)
+        return self.data_frame_to_numpy()
+    def second_pre_process(self, risk_threshold):
+        self.load_data
+        self.clean_data
+        self.sort_by_event_id_time_to_tca
+        self.filter_by_risk(risk_threshold=-4.0)
+        return self.head(50)
+    
     
