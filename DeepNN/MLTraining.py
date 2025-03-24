@@ -24,7 +24,6 @@ X = X.to(device=computationDevice)
 t = t.to(device=computationDevice)
 model = model.to(device=computationDevice)
 
-
 optimiser = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 for i in range(n_epochs):

@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 model.load_state_dict(torch.load("Trained_MLModel.pth"))
 model.eval()
 
-X,t = DR.readData("test")
+X,t = DR.readData2("test")
 
 X = torch.tensor(X, dtype=torch.float)
 t = torch.tensor(t, dtype=torch.float).view(-1,1)
