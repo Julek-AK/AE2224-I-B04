@@ -1,27 +1,27 @@
 import numpy as np
 from hmmlearn import hmm
 
-# lengths = []
+lengths = []
 
-# observations = [np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1),
-#                 np.array([1, 0, 0, 0, 0, 0]).reshape(-1, 1),
-#                 np.array([0, 0, 1, 1, 1, 0]).reshape(-1, 1),
-#                 np.array([0, 0, 0, 1, 1, 1]).reshape(-1, 1),
-#                 np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1),
-#                 np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
-#                 np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1),
-#                 np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
-#                 np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1)]
+observations = [np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1),
+                np.array([1, 0, 0, 0, 0, 0]).reshape(-1, 1),
+                np.array([0, 0, 1, 1, 1, 0]).reshape(-1, 1),
+                np.array([0, 0, 0, 1, 1, 1]).reshape(-1, 1),
+                np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1),
+                np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
+                np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1),
+                np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
+                np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1)]
 
-# test = np.array([0, 0, 0, 0, 0, 0]).reshape(-1, 1)
+test = np.array([0, 0, 0, 0, 0, 0]).reshape(-1, 1)
 
-# print(len(observations[0]))
+print(len(observations[0]))
 
-# for obs in observations:
-#     lengths.append(len(obs))
+for obs in observations:
+    lengths.append(len(obs))
 
-# # gets correct format for hmmlearn
-# squishedObservations = np.concatenate(observations)
+# gets correct format for hmmlearn
+squishedObservations = np.concatenate(observations)
 
 
 
@@ -32,7 +32,7 @@ def idealPrediction(obs, lens):
     scores = list()
     # tests a few random starts to find the global maximum
     # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
-    for idx in range (5):
+    for idx in range (50):
         # iteration number can also be increased for a lower likelyhood of being stuck
         model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=10)
         model.fit(obs, lens)
@@ -42,16 +42,16 @@ def idealPrediction(obs, lens):
         # see if it's working
         print(f'Converged: {model.monitor_.converged}\t\t'
                 f'Score: {scores[-1]}')
-    print(f'The best model had a score of {max(scores)}')
+        print(f'The best model had a score of {max(scores)}')
     # returns the best performing model
     return models[np.argmax(scores)]
 
-# model1 = idealPrediction(squishedObservations, lengths)
+model1 = idealPrediction(squishedObservations, lengths)
 
-# states = model1.predict(test)
+states = model1.predict(test)
 
-# print(states)
-# print(f'after: {model1.transmat_}')
+print(states)
+print(f'after: {model1.transmat_}')
 
 
 # function for predicting the next sequence of observations
@@ -85,5 +85,19 @@ def predictNext(model, observations, steps = 1):
             # print(nextSequence[-1])
         steps -= 1
 
-# #print(f'observation predicting: {observations[1]}')
-# print(f'next prediction: {predictNext(model1, test, 6)}')
+# print(f'observation predicting: {observations[1]}')
+print(f'next prediction: {predictNext(model1, test, 6)}')
+
+# Run predictNext multiple times and compute the average prediction
+def averagedPrediction(model, observations, steps=6, runs=100 ):
+    predictions = [predictNext(model, observations, steps) for _ in range(runs)]
+
+    # Compute the average value at each step and round it
+    avg_prediction = [round(sum(col) / len(col)) for col in zip(*predictions)]
+
+    return avg_prediction  # Keeps it as a list
+
+
+# Get the averaged prediction
+final_prediction = averagedPrediction(model1, test, 6, 100)
+print(f"Averaged Prediction: {final_prediction}")

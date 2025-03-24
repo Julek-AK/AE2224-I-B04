@@ -49,6 +49,6 @@ def formatData(dataName):
 
     return squishedObservations, lengths
 
-splitSet("HMM_train_data.csv", 0.1)
+# splitSet("HMM_train_data.csv", 0.1)
 
-formatData("HMM_training_set.csv")
+# formatData("HMM_training_set.csv")
