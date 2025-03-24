@@ -28,8 +28,8 @@ squishedObservations = np.concatenate(observations)
 # function finds the best model for observations (matrices)
 # returns a model
 def idealPrediction(obs, lens):
-    models = []
-    scores = []
+    models = list()
+    scores = list()
     # tests a few random starts to find the global maximum
     # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
     for idx in range (50):
@@ -46,7 +46,6 @@ def idealPrediction(obs, lens):
     # returns the best performing model
     return models[np.argmax(scores)]
 
-
 model1 = idealPrediction(squishedObservations, lengths)
 
 states = model1.predict(test)
@@ -56,7 +55,7 @@ print(f'after: {model1.transmat_}')
 
 
 # function for predicting the next sequence of observations
-# HAS TO BE REDONE
+#HAS TO BE REDONE
 # https://github.com/hmmlearn/hmmlearn/issues/171
 def predictNext(model, observations, steps = 1):
     
