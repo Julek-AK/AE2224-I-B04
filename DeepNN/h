@@ -1,0 +1,15 @@
+import math
+import numpy as np
+
+
+def OA(t_j2k_inc, c_j2k_inc):
+    OA = abs(t_j2k_inc*180/math.pi-c_j2k_inc*180/math.pi)
+    if (180-OA) < abs(t_j2k_inc-c_j2k_inc):
+        OA = (180-OA)
+    
+    return OA
+
+print(np.array(2))
+
+
+#column target and chaser inclination t_j2k_inc, 29, c_j2k_inc, 60 

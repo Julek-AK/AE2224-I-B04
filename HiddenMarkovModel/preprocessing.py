@@ -52,8 +52,6 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
 
     outcome: a tuple of two values. The first one is the risk state in the next CDM after the 2 day cut-off. The second value is the final
     risk state in the CDM closest to TCA
-
-    if traindata is set to False, the outcome column will not be present
     """
 
     print(f"Processing file {filename}")
@@ -80,7 +78,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
 
         df.sort_values(by='time_to_tca', ascending=False, inplace=True)
 
-        # Remove events with final collision risk of -30
+        # Remove events with all collision risks of -30
         if all(df['risk'] == -30):
             if verbose:
                 print("negligible risk")
@@ -148,6 +146,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
             prediction = (first_prediction, final_state)
         else:
             prediction = 0
+            raise NotImplementedError
 
         # Add to the dataset
         new_row = pd.DataFrame([{'event_id': event_id, 'observations': risk_sequence, 'outcome': prediction}])
