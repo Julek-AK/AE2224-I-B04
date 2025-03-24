@@ -80,7 +80,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
 
         df.sort_values(by='time_to_tca', ascending=False, inplace=True)
 
-        # Remove events with final collision risk of -30
+        # Remove events with all collision risks of -30
         if all(df['risk'] == -30):
             if verbose:
                 print("negligible risk")
