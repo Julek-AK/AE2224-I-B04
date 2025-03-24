@@ -1,27 +1,27 @@
 import numpy as np
 from hmmlearn import hmm
 
-lengths = []
+# lengths = []
 
-observations = [np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1),
-                np.array([1, 0, 0, 0, 0, 0]).reshape(-1, 1),
-                np.array([0, 0, 1, 1, 1, 0]).reshape(-1, 1),
-                np.array([0, 0, 0, 1, 1, 1]).reshape(-1, 1),
-                np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1),
-                np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
-                np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1),
-                np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
-                np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1)]
+# observations = [np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1),
+#                 np.array([1, 0, 0, 0, 0, 0]).reshape(-1, 1),
+#                 np.array([0, 0, 1, 1, 1, 0]).reshape(-1, 1),
+#                 np.array([0, 0, 0, 1, 1, 1]).reshape(-1, 1),
+#                 np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1),
+#                 np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
+#                 np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1),
+#                 np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1),
+#                 np.array([0, 0, 1, 0, 1, 1]).reshape(-1, 1)]
 
-test = np.array([0, 0, 0, 0, 0, 0]).reshape(-1, 1)
+# test = np.array([0, 0, 0, 0, 0, 0]).reshape(-1, 1)
 
-print(len(observations[0]))
+# print(len(observations[0]))
 
-for obs in observations:
-    lengths.append(len(obs))
+# for obs in observations:
+#     lengths.append(len(obs))
 
-# gets correct format for hmmlearn
-squishedObservations = np.concatenate(observations)
+# # gets correct format for hmmlearn
+# squishedObservations = np.concatenate(observations)
 
 
 
@@ -46,12 +46,12 @@ def idealPrediction(obs, lens):
     # returns the best performing model
     return models[np.argmax(scores)]
 
-model1 = idealPrediction(squishedObservations, lengths)
+# model1 = idealPrediction(squishedObservations, lengths)
 
-states = model1.predict(test)
+# states = model1.predict(test)
 
-print(states)
-print(f'after: {model1.transmat_}')
+# print(states)
+# print(f'after: {model1.transmat_}')
 
 
 # function for predicting the next sequence of observations
