@@ -7,7 +7,8 @@ def main():
     df.filter_by_risk(-4.0)
     df.sort_by_event_id_time_to_tca()
     df.create_event_dict()
-    print(df.train_df.head(50))
+    df.df_to_numpy()
+    print(df)
 
 if __name__ == '__main__':
-    main()'
+    main()

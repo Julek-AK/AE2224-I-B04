@@ -7,6 +7,8 @@ class Data_Manager:
         self.test_file = test_file
         self.train_df = None
         self.test_df = None
+        self.train_np = None
+        self.test_np = None
 
     def load_data(self):
         self.train_df = pd.read_csv(self.train_file)
@@ -43,3 +45,9 @@ class Data_Manager:
             for event_id, group in self.train_df.groupby('event_id')
         }
         return event_dict
+    def df_to_numpy():
+        self.train_np = self.train_df.to_numpy()
+        self.test_np = self.test_df.to_numpy()
+        
+
+    
