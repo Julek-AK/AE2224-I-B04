@@ -58,12 +58,8 @@ class Data_Manager:
         self.clean_data()
         self.sort_by_event_id_time_to_tca()
         self.filter_by_risk(risk_threshold)
-        return self.data_frame_to_numpy()
-    def second_pre_process(self, risk_threshold):
-        self.load_data
-        self.clean_data
-        self.sort_by_event_id_time_to_tca
-        self.filter_by_risk(risk_threshold=-4.0)
-        return self.head(50)
-    
-    
+        train_np, test_np = self.data_frame_to_numpy()
+        event_dict = self.create_event_dict()  
+        return train_np, test_np, event_dict
+
+
