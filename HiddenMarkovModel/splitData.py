@@ -8,7 +8,7 @@ def splitSet(dataName, cutPerc):
     dataSet =  pd.read_csv(rf"DataSets\{dataName}")
 
     # Split the data into training and validation sets
-    trainDf, valDf = train_test_split(dataSet, test_size=cutPerc, random_state=10)
+    trainDf, valDf = train_test_split(dataSet, test_size=cutPerc, random_state=42)
 
     # Print lengths to verify
     print(rf"Validation set length: {len(valDf)}")

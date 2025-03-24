@@ -29,22 +29,22 @@ from hmmlearn import hmm
 # returns a model
 def idealPrediction(obs, lens):
     models = list()
-    scores = list()
+    fitScores = list()
     # tests a few random starts to find the global maximum
     # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
     for idx in range (50, 70):
         # iteration number can also be increased for a lower likelyhood of being stuck
-        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=20)
+        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=30)
         model.fit(obs, lens)
         models.append(model)
         # score shows how good the model is
-        scores.append(model.score(obs, lens))
+        fitScores.append(model.score(obs, lens))
         # see if it's working
         print(f'Converged: {model.monitor_.converged}\t\t'
-                f'Score: {scores[-1]}')
-        print(f'The best model had a score of {max(scores)}')
+                f'Score: {fitScores[-1]}')
+    print(f'The best model had a score of {max(fitScores)}')
     # returns the best performing model
-    return models[np.argmax(scores)]
+    return models[np.argmax(fitScores)]
 
 # model1 = idealPrediction(squishedObservations, lengths)
 
