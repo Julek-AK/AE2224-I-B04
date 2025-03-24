@@ -21,25 +21,26 @@ def splitSet(dataName, cutPerc):
     return
 
 def formatData(dataName, validation = False):
+    '''Takes the input from the database and reformats it
+    returns two arrays'''
     observations = list()
     lengths = list()
 
     dataSet =  pd.read_csv(f"DataSets\{dataName}")
 
+    # We need the observations no matter if it's the validation or training set
     observationList = dataSet['observations'].tolist()
-    # print(observationList)
 
+    # Formatting, as the data for some reason is a string, also converts it to the right shaped array
     for row in observationList:
 
         row = row.replace(",", "")
         row = row[1:-1]
         row = np.array(list(map(int, row.split()))).reshape(-1, 1)
         lengths.append(len(row))
-        
-
         observations.append(row)
         
-        #print(type(row))
+    # If it's a validation set we don't need the lengths but we do need the outcomes to test against
     if validation: 
         outcomes = list()
         outcomeList = dataSet['outcome'].tolist()
@@ -56,7 +57,3 @@ def formatData(dataName, validation = False):
     else:
         return observations, lengths
 
-
-# splitSet("HMM_train_data.csv", 0.1)
-
-# formatData("HMM_training_set.csv")
