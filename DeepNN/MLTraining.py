@@ -1,3 +1,4 @@
+import torch.optim.adam
 import DataReading as DR
 import torch 
 import numpy as np
@@ -24,7 +25,7 @@ X = X.to(device=computationDevice)
 t = t.to(device=computationDevice)
 model = model.to(device=computationDevice)
 
-optimiser = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 for i in range(n_epochs):
     y_pred = model(X)
