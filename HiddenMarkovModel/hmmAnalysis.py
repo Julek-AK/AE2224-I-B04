@@ -1,3 +1,4 @@
+import pomegranate
 from pomegranate.distributions import Categorical
 from pomegranate.hmm import DenseHMM
 import numpy as np

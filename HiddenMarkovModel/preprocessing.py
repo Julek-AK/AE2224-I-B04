@@ -58,7 +58,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
     if filename == "test_data.csv":
         raise NotImplementedError("test data doesn't contain predictions, this is yet to be implemented")
 
-    csv = pd.read_csv(f"DataSets\{filename}")
+    csv = pd.read_csv(rf"DataSets\{filename}")
     csv = cleanup(csv)
 
     # Additional cleanups

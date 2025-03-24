@@ -28,8 +28,8 @@ squishedObservations = np.concatenate(observations)
 # function finds the best model for observations (matrices)
 # returns a model
 def idealPrediction(obs, lens):
-    models = list()
-    scores = list()
+    models = []
+    scores = []
     # tests a few random starts to find the global maximum
     # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
     for idx in range (50):
@@ -46,6 +46,7 @@ def idealPrediction(obs, lens):
     # returns the best performing model
     return models[np.argmax(scores)]
 
+
 model1 = idealPrediction(squishedObservations, lengths)
 
 states = model1.predict(test)
@@ -55,7 +56,7 @@ print(f'after: {model1.transmat_}')
 
 
 # function for predicting the next sequence of observations
-#HAS TO BE REDONE
+# HAS TO BE REDONE
 # https://github.com/hmmlearn/hmmlearn/issues/171
 def predictNext(model, observations, steps = 1):
     
@@ -85,5 +86,19 @@ def predictNext(model, observations, steps = 1):
             # print(nextSequence[-1])
         steps -= 1
 
-#print(f'observation predicting: {observations[1]}')
+# print(f'observation predicting: {observations[1]}')
 print(f'next prediction: {predictNext(model1, test, 6)}')
+
+# Run predictNext multiple times and compute the average prediction
+def averagedPrediction(model, observations, steps=6, runs=100 ):
+    predictions = [predictNext(model, observations, steps) for _ in range(runs)]
+
+    # Compute the average value at each step and round it
+    avg_prediction = [round(sum(col) / len(col)) for col in zip(*predictions)]
+
+    return avg_prediction  # Keeps it as a list
+
+
+# Get the averaged prediction
+final_prediction = averagedPrediction(model1, test, 6, 100)
+print(f"Averaged Prediction: {final_prediction}")
