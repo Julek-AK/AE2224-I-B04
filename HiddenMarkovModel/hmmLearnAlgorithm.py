@@ -32,9 +32,9 @@ def idealPrediction(obs, lens):
     scores = list()
     # tests a few random starts to find the global maximum
     # look at results, see if it makes sense or not. Sometimes is stuck in a local maximum and then this needs to be increased
-    for idx in range (5):
+    for idx in range (50, 70):
         # iteration number can also be increased for a lower likelyhood of being stuck
-        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=10)
+        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=20)
         model.fit(obs, lens)
         models.append(model)
         # score shows how good the model is
@@ -84,6 +84,29 @@ def predictNext(model, observations, steps = 1):
             # print([transMatrix[prediction][0], transMatrix[prediction][1]])
             # print(nextSequence[-1])
         steps -= 1
+
+def scores(model, observations, outcomes):
+    scoreNext = 0
+    scoreLast = 0
+
+    for i in range(len(observations)):
+        print(f"Predicted: {model.predict(observations[i])}")
+        futurePrediction = predictNext(model, observations[i], 3)
+        print(f'next prediction: {futurePrediction}')
+
+        if futurePrediction[0] == outcomes[i][0]:
+            scoreNext += 1
+
+        if futurePrediction[-1] == outcomes[i][-1]:
+            scoreLast += 1
+    
+    scoreNext /= len(observations)
+    scoreLast /= len(observations)
+    
+    return scoreNext, scoreLast
+
+
+
 
 # #print(f'observation predicting: {observations[1]}')
 # print(f'next prediction: {predictNext(model1, test, 6)}')
