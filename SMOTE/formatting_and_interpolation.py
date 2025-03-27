@@ -25,7 +25,7 @@ def Interpolate_(eventlist, points,accuracy=500, scaling=1):
         results.append(np.array([output_Pc]))
         #print(output_TCA, output_Pc)
 
-        
+        '''
         plt.plot(TCA, Pc, 'o', label = 'data')                              #original data points visualization
         #plt.plot(x,y,'o', label= 'interpolant1')                            #individual data points visualization
         #plt.plot(x,y,'-', label= 'interpolant')                             #interpolant visualization
@@ -36,7 +36,7 @@ def Interpolate_(eventlist, points,accuracy=500, scaling=1):
         plt.xlabel('TCA')
         plt.ylabel('Pc')
         plt.show()
-        
+        '''
     return results                                                          
     
 
