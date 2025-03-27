@@ -79,7 +79,7 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
 
     print(f"F-score: {F_score:.3g}")
     print(f"High risk MSE: {MSE_HR:.3g}")
-    print(f"Final Loss Score: {L_score}")
+    print(f"Final Loss Score: {L_score:.3g}")
 
 
 
