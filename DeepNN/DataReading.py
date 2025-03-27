@@ -37,10 +37,10 @@ def readData(data_type):
     return X,t 
 
 def readData2(data_type):
-    rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84])
-    rawData = rawData.to_numpy()
-    OA_data = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[28,59])
-    OA_data = OA_data.to_numpy()
+    df = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84,28,59])
+    rawData = df.iloc[:, :4].to_numpy()  # First 4 columns
+    OA_data = df.iloc[:, 4:].to_numpy()  # Last 2 columns
+
 
 #data collection, split up in input and output
 #input vector X, target vector Y 
