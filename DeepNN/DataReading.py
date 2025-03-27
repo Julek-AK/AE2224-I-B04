@@ -1,6 +1,6 @@
 #Notes: orignigal risk is in log 10 scale
 #Note: for now, each CDm is taken as an input and the CDM @ TCA as the target value
-
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np 
 #data import 
@@ -37,17 +37,19 @@ def readData(data_type):
     return X,t 
 
 def readData2(data_type):
-    df = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84,28,59])
-    rawData = df.iloc[:, :4].to_numpy()  # First 4 columns
-    OA_data = df.iloc[:, 4:].to_numpy()  # Last 2 columns
-
-
+    if data_type == 'validation':
+        rawData = pd.read_csv("../DataSets/train_data.csv", usecols=[0,1,3,84])
+        rawData = rawData.to_numpy()
+        OA_data = pd.read_csv("../DataSets/train_data.csv", usecols=[28,59])
+        OA_data = OA_data.to_numpy()
+    else:
+        rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84])
+        rawData = rawData.to_numpy()
+        OA_data = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[28,59])
+        OA_data = OA_data.to_numpy()
+    
 #data collection, split up in input and output
 #input vector X, target vector Y 
-    event = []
-
-    i  = 0
-    j = 0
     # OA = np.array([])
     # for CDM in OA_data:
     #     if abs(CDM[0] - CDM[1]) < abs(CDM[1]-CDM[0]):
@@ -55,10 +57,25 @@ def readData2(data_type):
     #     else:
     #         OA = np.array(180)
     OA = np.array([CDM[0] - CDM[1] for CDM in OA_data])
-    for i in range(len(rawData)):
-        for j, CDM in enumerate(rawData):
-            event.append(np.append(CDM, OA[j]))
-
+    CDMlist = np.column_stack((rawData, OA))
+    np.savetxt("../DataSets/ProcessedData.txt", CDMlist, delimiter=",")
     #Maybe implement normalsing here
-    return event
-print(readData2("test"))
+    event_indices = CDMlist[:, 0].astype(int)  # Convert index to integers
+    unique_events = np.unique(event_indices)  # Get unique event IDs
+
+    # Group data by event index
+    grouped_events = [CDMlist[event_indices == event_id] for event_id in unique_events]
+
+    # Convert to 3D NumPy array if all groups have the same length
+    try:
+        grouped_events = np.array(grouped_events)  # 3D array if possible
+    except ValueError:
+        pass  # Keep as list if different event sizes
+    if data_type=="test":
+        return grouped_events
+    else:
+        trainset, validationset = train_test_split(grouped_events, test_size=0.1, random_state=42)
+        if data_type=="validation":
+            return validationset
+        return trainset
+print(len(readData2("validation")))

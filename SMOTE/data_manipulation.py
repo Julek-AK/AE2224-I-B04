@@ -58,10 +58,8 @@ def event_with_extreme_cdms(event_dict):
             min_event = event_id
     return max_event, max_cdms, min_event, min_cdms
 
-# Example usage:
+'''
 max_event, max_cdms, min_event, min_cdms = event_with_extreme_cdms(event_dict)
 print(f"Event {max_event} has the maximum number of CDMs: {max_cdms}")
 print(f"Event {min_event} has the minimum number of CDMs: {min_cdms}")
-
-
-
+'''
