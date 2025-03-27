@@ -74,8 +74,7 @@ def readData2(data_type):
     if data_type=="test":
         return grouped_events
     else:
-        trainset, validationset = train_test_split(grouped_events, test_size=0.1, random_state=42)
+        trainset, validationset = train_test_split(grouped_events, test_size=0.1, random_state=42, shuffle=False)
         if data_type=="validation":
             return validationset
         return trainset
-print(len(readData2("validation")))
