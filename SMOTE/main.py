@@ -8,7 +8,7 @@ def main():
     print("Preprocessing complete.")
     print("Train Array shape:", train_array.shape)
     print("Test Array shape:", test_array.shape)
-    plot_cdm_counts(event_dict, plot_type="histogram")
+    plot_cdm_counts(event_dict, plot_type="bar")
     num_events = len(event_dict)
     print(f"Number of events: {num_events}")
 

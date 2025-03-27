@@ -29,3 +29,35 @@ def plot_cdm_counts(event_dict, plot_type="histogram"):
         plt.show()
     else:
         print("Unknown plot type. Use 'histogram' or 'bar'.")
+
+def plot_scatter_cdm(event_dict, plot_type='scatter'):
+    """
+    Plots a scatter plot of CDM positions for each event from an event dictionary.
+    
+    Parameters:
+        event_dict (dict): Dictionary where keys are event IDs and values are 2D numpy arrays.
+                           Each array should have at least two columns corresponding to x and y coordinates.
+        plot_type (str): Currently only supports 'scatter'.
+    """
+    if plot_type != 'scatter':
+        print("Unknown plot type. Use 'scatter'.")
+        return
+
+    plt.figure(figsize=(10, 7))
+    
+    # Loop through each event and plot its CDM positions
+    for event_id, cdm_array in event_dict.items():
+        # Ensure there are at least two dimensions for a scatter plot
+        if cdm_array.shape[1] < 2:
+            print(f"Event {event_id} does not have enough dimensions for a scatter plot (requires at least 2).")
+            continue
+        
+        x = cdm_array[:, 0]
+        y = cdm_array[:, 1]
+        plt.scatter(x, y, label=f"Event {event_id}", alpha=0.7)
+    
+    plt.xlabel("Risk")
+    plt.ylabel("Time to TCA")
+    plt.title("placeholdeeer")
+    plt.legend()
+    plt.show()
