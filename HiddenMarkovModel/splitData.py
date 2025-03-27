@@ -56,4 +56,3 @@ def formatData(dataName, validation = False):
     
     else:
         return observations, lengths
-
