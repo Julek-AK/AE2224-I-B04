@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np 
+import time
 #data import 
 
 def readData(data_type):
@@ -38,16 +39,11 @@ def readData(data_type):
 
 def readData2(data_type):
     df = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84,28,59])
-    rawData = df.iloc[:, :4].to_numpy()  # First 4 columns
-    OA_data = df.iloc[:, 4:].to_numpy()  # Last 2 columns
-
-
+    rawData = df.iloc[:, [0,1,2,3]].values  # Ensuring correct selection
+    OA_data = df.iloc[:, [4,5]].values
 #data collection, split up in input and output
 #input vector X, target vector Y 
     event = []
-
-    i  = 0
-    j = 0
     # OA = np.array([])
     # for CDM in OA_data:
     #     if abs(CDM[0] - CDM[1]) < abs(CDM[1]-CDM[0]):
@@ -55,10 +51,8 @@ def readData2(data_type):
     #     else:
     #         OA = np.array(180)
     OA = np.array([CDM[0] - CDM[1] for CDM in OA_data])
-    for i in range(len(rawData)):
-        for j, CDM in enumerate(rawData):
-            event.append(np.append(CDM, OA[j]))
-
+    event = np.column_stack((rawData, OA))
+    np.savetxt("../DataSets/ProcessedData.txt", event, delimiter=",")
     #Maybe implement normalsing here
     return event
 print(readData2("test"))
