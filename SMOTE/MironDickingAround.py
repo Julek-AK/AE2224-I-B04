@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tslearn.clustering import TimeSeriesKMeans
-from tslearn.clustering import TimeSeriesDBA
 import warnings
 # Suppress FutureWarnings from sklearn
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from kneed import KneeLocator
+from fastdtw import fastdtw
 
 def find_optimal_k(
     data, 
@@ -140,21 +140,34 @@ def cluster_high_risk_events(data, num_clusters):
     
     return kmeans_dtw, clustered_events
 
-def apply_dba_to_centroids(kmeans_model, data):
+def apply_dba_to_centroids(kmeans_model, data, n_iter=10):
     """
     Apply DBA to the centroids of the k-means model to improve the centroids using DTW averaging.
     """
     # Extract the centroids of the clusters from the KMeans model
     centroids = kmeans_model.cluster_centers_
 
-    # Apply DBA to the centroids
-    dba = TimeSeriesDBA(n_iter=10)  # Apply 10 iterations of DBA to improve centroids
-    dba.fit(data)
+    new_centroids = []
+    for i, centroid in enumerate(centroids):
+        aligned_timeseries = []
+        for series in data:
+            # Apply DTW to align each time series to the centroid
+            distance, path = fastdtw(series, centroid)  # Get the DTW distance and alignment path
+            
+            # Align the series based on the DTW path
+            aligned_series = [series[i] for i, j in path]  # Extract aligned time series
+            aligned_timeseries.append(aligned_series)
 
-    # Get the DBA-averaged centroids
-    improved_centroids = dba.cluster_centers_
+        # Ensure all time series are the same length (pad with NaN if necessary)
+        max_length = max(len(series) for series in aligned_timeseries)
+        aligned_timeseries_padded = [np.pad(series, (0, max_length - len(series)), mode='constant', constant_values=np.nan) for series in aligned_timeseries]
 
-    return improved_centroids
+        # Recalculate centroid by averaging the aligned time series
+        new_centroid = np.nanmean(aligned_timeseries_padded, axis=0)  # Use nanmean to ignore NaN values
+        new_centroids.append(new_centroid)
+
+    return np.array(new_centroids)
+
 
 # Example high-risk events dataset
 high_risk_events = np.array([
