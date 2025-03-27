@@ -17,7 +17,5 @@ model1 = idealPrediction(squishedObservations, lengths)
 print(f'transmat {model1.transmat_}')
 
 # check with validation model and get score
-nextScore, lastScore = scores(model1, valObservations, valOutcomes, steps = 2)
+nextScore, lastScore = scores(model1, valObservations, valOutcomes, steps = 3)
 print(f'next: {round(nextScore, 3)}%, last: {round(lastScore, 3)}%')
-
-
