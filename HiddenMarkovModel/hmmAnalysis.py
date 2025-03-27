@@ -13,7 +13,7 @@ squishedObservations = np.concatenate(observations)
 valObservations, valOutcomes = formatData("HMM_validation_set.csv", validation=True)
 
 # train model with train set
-model1 = idealPrediction(squishedObservations, lengths)
+model1 = idealPrediction(squishedObservations, lengths, 30)
 print(f'transmat {model1.transmat_}')
 
 # check with validation model and get score

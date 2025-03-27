@@ -2,7 +2,7 @@ import numpy as np
 from hmmlearn import hmm
 
 
-def idealPrediction(obs, lens):
+def idealPrediction(obs, lens, n_iter):
     '''function finds the best model for observations (matrices),
     returns a model'''
     models = list()
@@ -13,7 +13,7 @@ def idealPrediction(obs, lens):
     for idx in range (50, 70):
 
         # iteration number can also be changed for a lower likelyhood of being stuck
-        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=30)
+        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=n_iter)
         model.fit(obs, lens)
         models.append(model)
 
