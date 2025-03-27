@@ -1,9 +1,8 @@
 #Notes: orignigal risk is in log 10 scale
 #Note: for now, each CDm is taken as an input and the CDM @ TCA as the target value
-
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np 
-import time
 #data import 
 
 def readData(data_type):
@@ -38,10 +37,17 @@ def readData(data_type):
     return X,t 
 
 def readData2(data_type):
-    rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84])
-    rawData = rawData.to_numpy()
-    OA_data = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[28,59])
-    OA_data = OA_data.to_numpy()
+    if data_type == 'validation':
+        rawData = pd.read_csv("../DataSets/train_data.csv", usecols=[0,1,3,84])
+        rawData = rawData.to_numpy()
+        OA_data = pd.read_csv("../DataSets/train_data.csv", usecols=[28,59])
+        OA_data = OA_data.to_numpy()
+    else:
+        rawData = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[0,1,3,84])
+        rawData = rawData.to_numpy()
+        OA_data = pd.read_csv("../DataSets/"+data_type+"_data.csv", usecols=[28,59])
+        OA_data = OA_data.to_numpy()
+    
 #data collection, split up in input and output
 #input vector X, target vector Y 
     # OA = np.array([])
@@ -65,6 +71,11 @@ def readData2(data_type):
         grouped_events = np.array(grouped_events)  # 3D array if possible
     except ValueError:
         pass  # Keep as list if different event sizes
-
-    return grouped_events
-print(readData2("test")[1])
+    if data_type=="test":
+        return grouped_events
+    else:
+        trainset, validationset = train_test_split(grouped_events, test_size=0.1, random_state=42)
+        if data_type=="validation":
+            return validationset
+        return trainset
+print(len(readData2("validation")))
