@@ -8,16 +8,16 @@ lengths = []
 splitSet("HMM_train_data.csv", 0.1)
 observations, lengths = formatData("HMM_training_set.csv")
 squishedObservations = np.concatenate(observations)
-test = np.array([1, 1, 1, 1, 1, 1]).reshape(-1, 1)
 
 # validation set
 valObservations, valOutcomes = formatData("HMM_validation_set.csv", validation=True)
 
+# train model with train set
 model1 = idealPrediction(squishedObservations, lengths)
 print(f'transmat {model1.transmat_}')
 
-nextScore, lastScore = scores(model1, valObservations, valOutcomes)
-
-print(f'next: {nextScore}, last: {lastScore}')
+# check with validation model and get score
+nextScore, lastScore = scores(model1, valObservations, valOutcomes, steps = 2)
+print(f'next: {round(nextScore, 3)}%, last: {round(lastScore, 3)}%')
 
 

@@ -1,8 +1,7 @@
 import pandas as pd
 import scipy
 import numpy as np
-from formatting_and_interpolation import Interpolate_
-from DTW_elbow import find_optimal_k, cluster_high_risk_events
+
 
 
 def pandas_data_frame_creation ():
@@ -40,10 +39,29 @@ train_df, test_df = pandas_data_frame_creation()
 filtered_train_df = filter_by_risk(train_df, -4.0)
 sorted_train_df = sort_by_mission_id(filtered_train_df)
 cleaned_data = clean_data(sorted_train_df)
-dictionary_for_benjamin = create_event_dict(cleaned_data)
-print(cleaned_data.head(50))
+print(cleaned_data.head(60))
+event_dict = create_event_dict(cleaned_data)
 
-event_dict = Interpolate_(dictionary_for_benjamin, 100)
-optimal_k = find_optimal_k(event_dict, drop_threshold=10)
-clustered_events = cluster_high_risk_events(event_dict, optimal_k)
-print(clustered_events)
+def event_with_extreme_cdms(event_dict):
+    max_event = None
+    max_cdms = -1  # start with a very low number
+    min_event = None
+    min_cdms = float('inf')  # start with a very high number
+    
+    for event_id, cdm_array in event_dict.items():
+        num_cdms = cdm_array.shape[0]
+        if num_cdms > max_cdms:
+            max_cdms = num_cdms
+            max_event = event_id
+        if num_cdms < min_cdms:
+            min_cdms = num_cdms
+            min_event = event_id
+    return max_event, max_cdms, min_event, min_cdms
+
+# Example usage:
+max_event, max_cdms, min_event, min_cdms = event_with_extreme_cdms(event_dict)
+print(f"Event {max_event} has the maximum number of CDMs: {max_cdms}")
+print(f"Event {min_event} has the minimum number of CDMs: {min_cdms}")
+
+
+
