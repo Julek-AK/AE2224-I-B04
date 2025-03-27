@@ -2,15 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
-events = {1 : np.random.random((2,10)), 2 : np.array([[0,1,4,9,16,25],[0,1,2,3,4,5]]), 4 : np.array([[0,1,8,27,64,125],[0,1,2,3,4,5]])}
 
 def Interpolate_(eventlist, points,accuracy=500, scaling=1):
     interp_data = []
     results = []
     for i in sorted(eventlist.keys()):
         event = eventlist[i]  
-        Pc = event[0,:]
-        TCA = scaling*event[1,:]
+        Pc = event[:,0]
+        TCA = scaling*event[:,1]
 
 
         interpolant = interp1d(TCA, Pc , kind= 'linear' )
@@ -64,5 +63,7 @@ plt.xlabel('TCA')
 plt.ylabel('Pc')
 plt.show()
 '''
-
-print(Interpolate_(events, 10))
+if __name__ == '__main__':
+    #events1 = {1 : np.random.random((2,10)), 2 : np.array([[0,1,4,9,16,25],[0,1,2,3,4,5]]), 4 : np.array([[0,1,8,27,64,125],[0,1,2,3,4,5]])}
+    events2 = {1 : np.array([[0,0],[1,1],[4,2],[9,3],[16,4],[25,5]]), 3 : np.array([[0,0],[1,1],[8,2],[27,3],[64,4],[125,5]])}
+    print(Interpolate_(events2, 100))
