@@ -63,7 +63,7 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True):
     # gets prediction
     for i in range(len(observations)):
         print(f"Predicted: {model.predict(observations[i])}")
-        futurePrediction = predictNext(model, observations[i], steps)
+        futurePrediction = averagePredictions(model, observations[i], steps = steps, avTimes = 3)
         print(f'next prediction: {futurePrediction}')
         
         if score:
