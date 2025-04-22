@@ -118,7 +118,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
             # Distribute known datapoints amongst the 15 required CDMs
             risk_sequence = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
             for risk, time in zip(risks, times):
-                i = (6 - np.floor(time))*3
+                i = int((6 - np.floor(time))*3)
                 while i < 15:
                     if risk_sequence[i] is None:
                         risk_sequence[i] = risk
@@ -164,4 +164,4 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=Fals
 
 if __name__ == '__main__':
     # generate_hmm_data("train_data.csv" )
-    generate_hmm_data("test_data.csv", traindata=False, verbose=True)
+    generate_hmm_data("train_data.csv", traindata=True, verbose=False)
