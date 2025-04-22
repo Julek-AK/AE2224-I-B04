@@ -7,7 +7,10 @@ from kneed import KneeLocator
 
 class TimeSeriesClustering:
     """
-    A class to perform DTW-based K-Means clustering on time series data,
+    A class to perform DTW-based K-Means clustering on time series da
+    
+    
+    ta,
     find the optimal number of clusters via the elbow method, and improve
     cluster centroids using DTW Barycenter Averaging (DBA).
     """
