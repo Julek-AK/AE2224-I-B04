@@ -74,12 +74,13 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
     N = np.count_nonzero(true_risk_binary)
     high_risk_squared_errors = true_risk_binary * np.pow((predicted_risk - true_risk), 2)
     MSE_HR = np.sum(high_risk_squared_errors) / N
-
     L_score = MSE_HR/F_score
 
     print(f"F-score: {F_score:.3g}")
     print(f"High risk MSE: {MSE_HR:.3g}")
     print(f"Final Loss Score: {L_score:.3g}")
+
+    return F_score, MSE_HR, L_score
 
 
 
@@ -104,7 +105,6 @@ if __name__ == '__main__':
         except IndexError:
             row = df[df['time_to_tca'] == min_tca_time]
             risk = float(df['risk'].iloc[0])
-
 
         new_row = pd.DataFrame([{'event_id': event_id, 'true_risk': risk}])
         clean_test_data = pd.concat([clean_test_data, new_row], ignore_index=True)
