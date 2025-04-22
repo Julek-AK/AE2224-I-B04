@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 # Synthetic sine wave data for example
 t = np.linspace(0, 100, 500)
 data = np.sin(t) + 0.1 * np.random.randn(len(t))
@@ -24,9 +27,12 @@ seq_length = 20
 X, y = create_sequences(data, seq_length)
 X = X.unsqueeze(-1)  # Add input_size dim (1 feature)
 
+X = X.to(device)
+y = y.to(device)
+
 # Define the LSTM model
 class LSTMTimeSeries(nn.Module):
-    def __init__(self, input_size=1, hidden_size=50, num_layers=2):
+    def __init__(self, input_size=1, hidden_size=50, num_layers=4):
         super(LSTMTimeSeries, self).__init__()
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, 1)
@@ -36,15 +42,17 @@ class LSTMTimeSeries(nn.Module):
         return self.fc(out[:, -1, :])  # Use last time step for prediction
 
 # Train the model
-model = LSTMTimeSeries()
+model = LSTMTimeSeries().to(device)
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 dataset = TensorDataset(X, y)
 loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 # Training loop
-for epoch in range(20):
+for epoch in range(30):
     for xb, yb in loader:
+        xb = xb.to(device)
+        yb = yb.to(device)
         pred = model(xb)
         loss = criterion(pred.squeeze(), yb)
         optimizer.zero_grad()
