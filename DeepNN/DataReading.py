@@ -36,7 +36,9 @@ def readData(data_type):
     #Maybe implement normalsing here
     return X,t 
 
-def readData2(data_type):
+
+
+def readData3(data_type):
     if data_type == 'validation':
         rawData = pd.read_csv("../DataSets/train_data.csv", usecols=[0,1,3,84])
         rawData = rawData.to_numpy()
@@ -78,3 +80,5 @@ def readData2(data_type):
         if data_type=="validation":
             return validationset
         return trainset
+readData3("Train")    
+

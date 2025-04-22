@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 model.load_state_dict(torch.load("Trained_MLModel.pth"))
 model.eval()
 
-X,t = DR.readData2("test")
+X,t = DR.readData2("validation")
 
 #Normalise data 
 scaler = StandardScaler()
