@@ -1,5 +1,8 @@
 DataSets
 SMOTE/Data_Manager.py
 SMOTE/victor_main_playaround.py
+HiddenMarkovModel/hmmModel.pkl
+HiddenMarkovModel/hmmModel1.pkl
+hmmNotebook.ipynp
 **/__pycache__/
 
