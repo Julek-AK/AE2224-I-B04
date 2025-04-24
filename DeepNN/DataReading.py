@@ -78,7 +78,7 @@ readData3("Train")
 
 def readData4(data_type):
     filename = "../DataSets/train_data.csv" if data_type == "validation" else f"../DataSets/{data_type}_data.csv"
-    rawData = pd.read_csv(filename, usecols=[0,1,3,4,6,84]).to_numpy()
+    rawData = pd.read_csv(filename, usecols=[0,1,3,4,5,6,84]).to_numpy()
     OA_data = pd.read_csv(filename, usecols=[28,59]).to_numpy()
 
     # Compute OA (difference between the two columns)
@@ -101,7 +101,8 @@ def readData4(data_type):
     if data_type == "test":
         return grouped_events, lengths
     else:
-        trainset, validationset = train_test_split(list(zip(grouped_events, lengths)), test_size=0.1, random_state=42, shuffle=False)
+        trainset, validationset = train_test_split(list(zip(grouped_events, lengths)), test_size=0.1, random_state=41, shuffle=False)
         dataset = validationset if data_type == "validation" else trainset
         sequences, lengths = zip(*dataset)
         return list(sequences), list(lengths)
+#the good state = 42

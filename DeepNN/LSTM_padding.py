@@ -12,25 +12,20 @@ from sklearn.preprocessing import StandardScaler
 # Check if CUDA is available, if so, use GPU; otherwise, fall back to CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
-
+scaler = StandardScaler()
+all_data = torch.cat(DR.readData4('train')[0]).numpy()
+scaler.fit(all_data)  # Fit on all valid timesteps
 # Load data
 def data_create(data_type):
     sequences, lengths = DR.readData4(data_type)
 
     # Filter out sequences with target value == -30
-    filtered = [
-        (seq, length) 
-        for seq, length in zip(sequences, lengths) 
-        if seq[-1][2] != -30
-    ]
+    filtered = [(seq, length) for seq, length in zip(sequences, lengths) if seq[-1][2] != -30]
 
     sequences, lengths = zip(*filtered)
-    all_data = torch.cat(sequences).numpy()
-    scaler = StandardScaler()
-    scaler.fit(all_data)  # Fit on all valid timesteps
-
+   
     # Scale each sequence individually
-    scaled_sequences = [torch.tensor(scaler.transform(seq), dtype=torch.float32) for seq in sequences]
+    scaled_sequences = [torch.tensor(scaler.transform(seq[:-1]), dtype=torch.float32) for seq in sequences]
 
     # Pad to (batch, max_len, features)
     targets = torch.tensor([seq[-1][2] for seq in sequences], dtype=torch.float32).unsqueeze(1)
@@ -55,8 +50,8 @@ model = LSTMRegressor(input_size=input_size, hidden_size=100, num_layers=3, bidi
 def lossfn(outputs, targets):
     criterion1 = nn.MSELoss()
     criterion2 = nn.L1Loss()
-    loss_raw = criterion1(outputs_train, targets_train) + criterion2(outputs_train, targets_train)
-    weights = 1/(torch.abs(targets_train) + 1)  # Example: smaller values get higher weight
+    loss_raw = criterion1(outputs, targets) + criterion2(outputs, targets)
+    weights = 1/(torch.abs(targets) + 1)  # Example: smaller values get higher weight
     return (loss_raw * weights).mean()
 
 best_val_loss = float('inf')
@@ -65,7 +60,7 @@ patience_counter = 0
 
 optimizer = optim.Adam(model.parameters(),lr=0.001,weight_decay=1e-4)
 # Training loop
-num_epochs = 4000
+num_epochs = 1000
 for epoch in range(num_epochs):
     model.train()
 
@@ -79,22 +74,22 @@ for epoch in range(num_epochs):
     optimizer.step()
     model.eval()
     with torch.no_grad():
-        val_outputs = model(padded_validation, lengths_validation)
-        val_loss = lossfn(padded_validation, targets_validation)
+        outputs_validation = model(padded_validation, lengths_validation)
+        val_loss = lossfn(outputs_validation, targets_validation)
 
     # Logging
     print(f"Epoch {epoch+1} | Train Loss: {loss.item():.4f} | Val Loss: {val_loss.item():.4f}")
 
-    if val_loss.item() < best_val_loss:
-        best_val_loss = val_loss.item()
-        best_model_state = model.state_dict()  # Save best model
-        patience_counter = 0
-    else:
-        patience_counter += 1
-        if patience_counter >= patience:
-            print("Early stopping triggered!")
-            model.load_state_dict(best_model_state)  # Restore best model
-            break
+    # if val_loss.item() < best_val_loss:
+    #     best_val_loss = val_loss.item()
+    #     best_model_state = model.state_dict()  # Save best model
+    #     patience_counter = 0
+    # else:
+    #     patience_counter += 1
+    #     if patience_counter >= patience:
+    #         print("Early stopping triggered!")
+    #         model.load_state_dict(best_model_state)  # Restore best model
+    #         #break
     
     
 
