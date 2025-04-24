@@ -3,8 +3,6 @@ Implements the ESA scoring method for benchmarking models
 
 Currently, it uses the truncated test_data.csv, treating the CDM at 2 days as final, and the previous ones as 
 those used for predictions
-
-
 """
 
 # External imports
@@ -20,6 +18,9 @@ import pandas as pd
 test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0,1,3])
 test_data.dropna(inplace=True)
 test_data.drop_duplicates(inplace=True)
+
+# Correct for missing CDMs from 2 days up to TCA
+test_data['time_to_tca'] -= 2
 
 clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
 for event_id, df in test_data.groupby('event_id'):
@@ -91,6 +92,9 @@ if __name__ == '__main__':
     test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0,1,3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
+
+    # Correct for missing CDMs from 2 days up to TCA
+    # test_data['time_to_tca'] -= 2
 
     clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
     for event_id, df in test_data.groupby('event_id'):
