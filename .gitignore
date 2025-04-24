@@ -5,4 +5,4 @@ HiddenMarkovModel/hmmModel.pkl
 HiddenMarkovModel/hmmModel1.pkl
 hmmNotebook.ipynp
 **/__pycache__/
-
+__pycache__/
