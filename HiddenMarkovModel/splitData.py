@@ -5,7 +5,7 @@ import numpy as np
 
 def splitSet(dataName, cutPerc):
 
-    dataSet =  pd.read_csv(rf"DataSets\{dataName}")
+    dataSet =  pd.read_csv(rf"DataSets\\{dataName}")
 
     # Split the data into training and validation sets
     trainDf, valDf = train_test_split(dataSet, test_size=cutPerc, random_state=42)

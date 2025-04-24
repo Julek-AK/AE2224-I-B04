@@ -56,25 +56,36 @@ def predictNext(model, observations, steps = 1):
         steps -= 1
     return nextSequence
 
-def scores(model, observations, outcomes, steps=1):
+def predictAndScore(model, observations, outcomes, steps=1, score = True):
     scoreNext = 0
     scoreLast = 0
 
     # gets prediction
     for i in range(len(observations)):
         print(f"Predicted: {model.predict(observations[i])}")
-        futurePrediction = predictNext(model, observations[i], steps)
+        futurePrediction = averagePredictions(model, observations[i], steps = steps, avTimes = 3)
         print(f'next prediction: {futurePrediction}')
+        
+        if score:
+            #if predicted is correct, add point
+            if futurePrediction[0] == outcomes[i][0]:
+                scoreNext += 1
 
-        #if predicted is correct, add point
-        if futurePrediction[0] == outcomes[i][0]:
-            scoreNext += 1
-
-        if futurePrediction[-1] == outcomes[i][-1]:
-            scoreLast += 1
+            if futurePrediction[-1] == outcomes[i][-1]:
+                scoreLast += 1
     
     # average to get percentage correct
     scoreNext = scoreNext / len(observations) * 100
     scoreLast = scoreLast/ len(observations) * 100
     
-    return scoreNext, scoreLast
+    return futurePrediction, scoreNext, scoreLast
+
+def averagePredictions(model, observation, steps = 1, avTimes = 1):
+    predictions = []
+    for i in range(avTimes):
+        predictions.append(predictNext(model, observation, steps = steps))
+    
+    average = np.mean(np.array(predictions), axis = 0)
+    roundedAverage = np.round(average).astype(int)
+
+    return roundedAverage

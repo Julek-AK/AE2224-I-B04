@@ -5,13 +5,38 @@ from scipy.interpolate import interp1d
 
 def Interpolate_(eventlist, points, scaling=1):
     results = []
-    for i in sorted(eventlist):
-        Pc, TCA = eventlist[i][:,0], scaling * eventlist[i][:,1]
-        f = interp1d(TCA, Pc, kind='linear')
-        t_out = np.linspace(TCA.min(), TCA.max(), points)
-        results.append(f(t_out))
-    # convert list-of-1D-arrays → single 2D array (n_events × points)
-    return np.array(results)                                                       
+    for i in sorted(eventlist.keys()):
+        event = eventlist[i]  
+        Pc = event[:,0]
+        TCA = scaling*event[:,1]
+
+
+        interpolant = interp1d(TCA, Pc , kind= 'linear' )
+        #x = np.linspace(min(TCA),max(TCA),accuracy)
+        #y = interpolant(x)
+
+        #interp_data.append(np.array([x,y]))
+
+        output_TCA = np.linspace(min(TCA),max(TCA), points)
+        output_Pc = interpolant(output_TCA)
+    
+        results.append(np.ndarray.tolist(output_Pc))
+        #print(output_TCA, output_Pc)
+
+        '''
+        plt.plot(TCA, Pc, 'o', label = 'data')                              #original data points visualization
+        #plt.plot(x,y,'o', label= 'interpolant1')                            #individual data points visualization
+        #plt.plot(x,y,'-', label= 'interpolant')                             #interpolant visualization
+        plt.plot(output_TCA, output_Pc, 'o', label= 'output')               #output visualization
+        plt.gca().invert_xaxis()
+        plt.legend()
+        plt.title('Interpolant')
+        plt.xlabel('TCA')
+        plt.ylabel('Pc')
+        plt.show()
+        '''
+    return np.array(results)
+                                                              
     
 
 '''
@@ -42,6 +67,3 @@ if __name__ == '__main__':
     #events1 = {1 : np.random.random((2,10)), 2 : np.array([[0,1,4,9,16,25],[0,1,2,3,4,5]]), 4 : np.array([[0,1,8,27,64,125],[0,1,2,3,4,5]])}
     events2 = {1 : np.array([[0,0],[1,1],[4,2],[9,3],[16,4],[25,5]]), 3 : np.array([[0,0],[1,1],[8,2],[27,3],[64,4],[125,5]])}
     print(Interpolate_(events2, 3))
-
-    out = Interpolate_(events2, points=3)
-    print(type(out), out.shape)
