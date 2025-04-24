@@ -56,22 +56,20 @@ def predictNext(model, observations, steps = 1):
         steps -= 1
     return nextSequence
 
-def predictAndScore(model, observations, outcomes, steps=1, score = True):
+def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False):
     scoreNext = 0
     scoreLast = 0
     predictNonBinary = []
 
     # gets prediction
     for i, observation in enumerate(observations):
-        print(f"Predicted: {model.predict(observation)}")
         futurePrediction = averagePredictions(model, observation, steps = steps, avTimes = 3)
-        print(f'next prediction: {futurePrediction}')
+        if verbose:
+            print(f"Predicted: {model.predict(observation)}")
+            print(f'next prediction: {futurePrediction}')
         
 
-        if outcomes[i][-1] == 0:
-            predictNonBinary.append(-6.001)
-            print('here')
-        else: predictNonBinary.append(-5.34)
+
 
         if score:
             #if predicted is correct, add point
@@ -80,6 +78,10 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True):
 
             if futurePrediction[-1] == outcomes[i][-1]:
                 scoreLast += 1
+        else:
+            if outcomes[i][-1] == 0:
+                predictNonBinary.append(-6.001)
+            else: predictNonBinary.append(-5.34)
     
     if not score: return futurePrediction, predictNonBinary
     
