@@ -15,8 +15,8 @@ def splitSet(dataName, cutPerc):
     print(rf"Training set length: {len(trainDf)}")
 
     # Save the dataframes to CSV files
-    valDf.to_csv("DataSets\HMM_validation_set.csv", index=False)
-    trainDf.to_csv("DataSets\HMM_training_set.csv", index=False)
+    valDf.to_csv("DataSets\\HMM_validation_set.csv", index=False)
+    trainDf.to_csv("DataSets\\HMM_training_set.csv", index=False)
 
     return
 
