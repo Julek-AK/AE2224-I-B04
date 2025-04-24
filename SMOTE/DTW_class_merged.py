@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tslearn.clustering import TimeSeriesKMeans, TimeSeriesDBA
+from tslearn.clustering import TimeSeriesKMeans
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from kneed import KneeLocator
@@ -93,7 +93,7 @@ class TimeSeriesClustering:
         
         plt.tight_layout()
         plt.show()
-        print(f"Chosen elbow k: {optimal_k}")
+        print(f"Chosen elbow k according to the algorithm: {optimal_k}")
         
         return optimal_k
 
@@ -124,9 +124,10 @@ class TimeSeriesClustering:
         clustered_events = {k: np.array(v) for k, v in clustered_events.items()}
         
         return kmeans_model, clustered_events
-
+    """
     def apply_dba_to_centroids(self, kmeans_model):
-        """
+
+
         Applies DTW Barycenter Averaging (DBA) to refine the centroids
         obtained from the K-Means model.
         
@@ -135,13 +136,13 @@ class TimeSeriesClustering:
             
         Returns:
             improved_centroids (np.ndarray): The DBA-refined centroids.
-        """
+
         # Use DBA to refine the centroids.
         dba = TimeSeriesDBA(n_iter=10)
         dba.fit(self.data)
         improved_centroids = dba.cluster_centers_
         return improved_centroids
-
+        """
     def run_pipeline(self, k_min=1, k_max=10, drop_threshold=0.05, log_scale=False):
         """
         Runs the complete clustering pipeline:
@@ -157,17 +158,18 @@ class TimeSeriesClustering:
             improved_centroids (np.ndarray): The refined centroids.
         """
         optimal_k = self.find_optimal_k(k_min=k_min, k_max=k_max, drop_threshold=drop_threshold, log_scale=log_scale)
-        kmeans_model, clustered_events = self.cluster_high_risk_events(optimal_k)
-        improved_centroids = self.apply_dba_to_centroids(kmeans_model)
-        
+        k_value = int(input("Please input the optimal k value: ")) #this is bcs I want the user to select it based on the graph
+        kmeans_model, clustered_events = self.cluster_high_risk_events(k_value)
+        #improved_centroids = self.apply_dba_to_centroids(kmeans_model)
+        """"
         # Plot improved centroids.
         for i, centroid in enumerate(improved_centroids):
             plt.plot(centroid.ravel(), label=f'Improved Centroid {i}')
         plt.legend()
         plt.title("DBA Improved Centroids")
         plt.show()
-        
-        return optimal_k, kmeans_model, clustered_events, improved_centroids
+        """
+        return optimal_k, kmeans_model, clustered_events #,improved_centroids
 
 # ------------------ Example usage ------------------
 

@@ -1,8 +1,8 @@
 import pandas as pd
 import scipy
 import numpy as np
-
-
+from formatting_and_interpolation import Interpolate_
+from DTW_class_merged import TimeSeriesClustering
 
 def pandas_data_frame_creation ():
     train_df = pd.read_csv("DataSets/train_data.csv")
@@ -35,35 +35,44 @@ def create_event_dict(df):
     return event_dict
 
 
-train_df, test_df = pandas_data_frame_creation()
-filtered_train_df = filter_by_risk(train_df, -4.0)
-sorted_train_df = sort_by_mission_id(filtered_train_df)
-cleaned_data = clean_data(sorted_train_df)
+if __name__ == "__main__":
+
+    train_df, test_df = pandas_data_frame_creation()
+    filtered_train_df = filter_by_risk(train_df, -4.0)
+    sorted_train_df = sort_by_mission_id(filtered_train_df)
+    cleaned_data = clean_data(sorted_train_df)
 
 
-print(cleaned_data.shape)
-event_dict = create_event_dict(cleaned_data)
+    print(cleaned_data.shape)
+    event_dict = create_event_dict(cleaned_data)
 
 
 
-def event_with_extreme_cdms(event_dict):
-    max_event = None
-    max_cdms = -1  # start with a very low number
-    min_event = None
-    min_cdms = float('inf')  # start with a very high number
-    
-    for event_id, cdm_array in event_dict.items():
-        num_cdms = cdm_array.shape[0]
-        if num_cdms > max_cdms:
-            max_cdms = num_cdms
-            max_event = event_id
-        if num_cdms < min_cdms:
-            min_cdms = num_cdms
-            min_event = event_id
-    return max_event, max_cdms, min_event, min_cdms
+    def event_with_extreme_cdms(event_dict):
+        max_event = None
+        max_cdms = -1  # start with a very low number
+        min_event = None
+        min_cdms = float('inf')  # start with a very high number
+        
+        for event_id, cdm_array in event_dict.items():
+            num_cdms = cdm_array.shape[0]
+            if num_cdms > max_cdms:
+                max_cdms = num_cdms
+                max_event = event_id
+            if num_cdms < min_cdms:
+                min_cdms = num_cdms
+                min_event = event_id
+        return max_event, max_cdms, min_event, min_cdms
 
-'''
-max_event, max_cdms, min_event, min_cdms = event_with_extreme_cdms(event_dict)
-print(f"Event {max_event} has the maximum number of CDMs: {max_cdms}")
-print(f"Event {min_event} has the minimum number of CDMs: {min_cdms}")
-'''
+    '''
+    max_event, max_cdms, min_event, min_cdms = event_with_extreme_cdms(event_dict)
+    print(f"Event {max_event} has the maximum number of CDMs: {max_cdms}")
+    print(f"Event {min_event} has the minimum number of CDMs: {min_cdms}")
+    '''
+    interpolated_event_dict = Interpolate_(event_dict,3)
+
+    dtw = TimeSeriesClustering(interpolated_event_dict)
+    optimal_k, kmeans_model, clustered_events = dtw.run_pipeline()
+
+    #print(interpolated_event_dict)
+    print(clustered_events)
