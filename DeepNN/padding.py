@@ -2,9 +2,9 @@
 import numpy as np
 import DataReading as DR
 
-#testarray = [[7, 80,90], [5, 40,50], [3.3, 50, 60], [3.1, 60, 60], [2.2, 70, 60], [1.2,41,90], [0.90, 801, 1234]]
-testarray = DR.readData3("train")[0]
-print(testarray)
+testarray = [[7, 80,90], [5, 40,50], [3.3, 50, 60], [3.1, 60, 60], [2.2, 70, 60], [1.2,41,90], [0.90, 801, 1234]]
+#testarrays = DR.readData3("train")
+#testarray = testarrays[0]
 
 #Defenition
 n_cdms = 18
@@ -21,7 +21,6 @@ eventArray = np.full(18, np.nan)
 
 #Fill every CDM on the proper place
 for CDM in testarray:
-    print(CDM)
     PlaceInEventArray  = int(round((CDM[1]*3))-1) #x3 as there are 3 cdm per day, than round it to get an the proper int -1 as we start with 0
     #Get rid of all cdms not within 5 days prior to TCA
     if PlaceInEventArray > n_cdms -1:
@@ -52,7 +51,7 @@ for i in range(len(eventArray)):
             ForwardPad = True
             
         
-print(eventArray) 
+
 
         
 
