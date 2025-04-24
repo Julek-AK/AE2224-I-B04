@@ -107,7 +107,7 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
     
     return futurePrediction, scoreNext, scoreLast
 
-def averagePredictions(model, observation, steps = 1, avTimes = 1):
+def averagePredictions(model, observation, steps=1, avTimes=1):
     predictions = []
     for i in range(avTimes):
         predictions.append(predictNext(model, observation, steps = steps))
