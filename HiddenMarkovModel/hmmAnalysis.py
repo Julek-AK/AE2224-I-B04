@@ -33,5 +33,4 @@ model1 = idealPrediction(squishedObservations, lengths, 30)
 # with open(path, "rb") as f:
 #     model1 = pickle.load(f)
 # model1 = pickle.load(open('hmmModel.pkl', 'rb'))
-for observation in observations:
-    print(averagePredictions(model1, observation, 3, 3))
+predictAndScore(model1, valObservations, valOutcomes, steps = 3, score = False, binary = True)
