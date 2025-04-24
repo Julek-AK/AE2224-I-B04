@@ -72,7 +72,7 @@ def predictNext(model, observationList, steps = 1, binary = True):
     else:
         return -6.001 if nextSequence[-1] == 0 else -5.34
 
-def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False):
+def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False, binary = False):
     '''
     Predicts future risk based on a list of observations and also gives a score
     inputs: 
@@ -88,7 +88,7 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
 
     # gets prediction
     for i, observation in enumerate(observations):
-        futurePrediction = predictNext(model, observation, steps = steps)
+        futurePrediction = predictNext(model, observation, steps = steps, binary=binary)
         if verbose:
             print(f"Predicted: {model.predict(observation)}")
             print(f'next prediction: {futurePrediction}')
@@ -104,8 +104,11 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
     # average to get percentage correct
     scoreNext = scoreNext / len(observations) * 100
     scoreLast = scoreLast/ len(observations) * 100
-    
-    return futurePrediction, scoreNext, scoreLast
+
+    if score: 
+        return futurePrediction, scoreNext, scoreLast
+
+    else: return futurePrediction
 
 def averagePredictions(model, observation, steps = 1, avTimes = 1):
     predictions = []
