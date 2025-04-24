@@ -123,7 +123,7 @@ class TimeSeriesClustering:
             clustered_events[label].append(self.data[i])
         clustered_events = {k: np.array(v) for k, v in clustered_events.items()}
         
-        return kmeans_model, clustered_events
+        return kmeans_model, clustered_events, cluster_labels
     """
     def apply_dba_to_centroids(self, kmeans_model):
 
@@ -159,7 +159,7 @@ class TimeSeriesClustering:
         """
         optimal_k = self.find_optimal_k(k_min=k_min, k_max=k_max, drop_threshold=drop_threshold, log_scale=log_scale)
         k_value = int(input("Please input the optimal k value: ")) #this is bcs I want the user to select it based on the graph
-        kmeans_model, clustered_events = self.cluster_high_risk_events(k_value)
+        kmeans_model, clustered_events, cluster_labels = self.cluster_high_risk_events(k_value)
         #improved_centroids = self.apply_dba_to_centroids(kmeans_model)
         """"
         # Plot improved centroids.
@@ -169,7 +169,7 @@ class TimeSeriesClustering:
         plt.title("DBA Improved Centroids")
         plt.show()
         """
-        return optimal_k, kmeans_model, clustered_events #,improved_centroids
+        return optimal_k, kmeans_model, clustered_events, cluster_labels #,improved_centroids
 
 # ------------------ Example usage ------------------
 
