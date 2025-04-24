@@ -85,7 +85,6 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
     '''
     scoreNext = 0
     scoreLast = 0
-    predictNonBinary = []
 
     # gets prediction
     for i, observation in enumerate(observations):
@@ -94,9 +93,6 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
             print(f"Predicted: {model.predict(observation)}")
             print(f'next prediction: {futurePrediction}')
         
-
-
-
         if score:
             #if predicted is correct, add point
             if futurePrediction[0] == outcomes[i][0]:
@@ -104,12 +100,6 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
 
             if futurePrediction[-1] == outcomes[i][-1]:
                 scoreLast += 1
-        else:
-            if outcomes[i][-1] == 0:
-                predictNonBinary.append(-6.001)
-            else: predictNonBinary.append(-5.34)
-    
-    if not score: return futurePrediction, predictNonBinary
     
     # average to get percentage correct
     scoreNext = scoreNext / len(observations) * 100
