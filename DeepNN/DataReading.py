@@ -78,7 +78,7 @@ readData3("Train")
 
 def readData4(data_type):
     filename = "../DataSets/train_data.csv" if data_type == "validation" else f"../DataSets/{data_type}_data.csv"
-    rawData = pd.read_csv(filename, usecols=[0,1,3,84]).to_numpy()
+    rawData = pd.read_csv(filename, usecols=[0,1,3,4,6,84]).to_numpy()
     OA_data = pd.read_csv(filename, usecols=[28,59]).to_numpy()
 
     # Compute OA (difference between the two columns)
