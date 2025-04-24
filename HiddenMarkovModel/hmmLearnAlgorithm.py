@@ -56,25 +56,47 @@ def predictNext(model, observations, steps = 1):
         steps -= 1
     return nextSequence
 
-def scores(model, observations, outcomes, steps=1):
+def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False):
     scoreNext = 0
     scoreLast = 0
+    predictNonBinary = []
 
     # gets prediction
-    for i in range(len(observations)):
-        print(f"Predicted: {model.predict(observations[i])}")
-        futurePrediction = predictNext(model, observations[i], steps)
-        print(f'next prediction: {futurePrediction}')
+    for i, observation in enumerate(observations):
+        futurePrediction = averagePredictions(model, observation, steps = steps, avTimes = 3)
+        if verbose:
+            print(f"Predicted: {model.predict(observation)}")
+            print(f'next prediction: {futurePrediction}')
+        
 
-        #if predicted is correct, add point
-        if futurePrediction[0] == outcomes[i][0]:
-            scoreNext += 1
 
-        if futurePrediction[-1] == outcomes[i][-1]:
-            scoreLast += 1
+
+        if score:
+            #if predicted is correct, add point
+            if futurePrediction[0] == outcomes[i][0]:
+                scoreNext += 1
+
+            if futurePrediction[-1] == outcomes[i][-1]:
+                scoreLast += 1
+        else:
+            if outcomes[i][-1] == 0:
+                predictNonBinary.append(-6.001)
+            else: predictNonBinary.append(-5.34)
+    
+    if not score: return futurePrediction, predictNonBinary
     
     # average to get percentage correct
     scoreNext = scoreNext / len(observations) * 100
     scoreLast = scoreLast/ len(observations) * 100
     
-    return scoreNext, scoreLast
+    return futurePrediction, scoreNext, scoreLast
+
+def averagePredictions(model, observation, steps = 1, avTimes = 1):
+    predictions = []
+    for i in range(avTimes):
+        predictions.append(predictNext(model, observation, steps = steps))
+    
+    average = np.mean(np.array(predictions), axis = 0)
+    roundedAverage = np.round(average).astype(int)
+
+    return roundedAverage

@@ -1,6 +1,7 @@
 import pandas as pd
-import scipy
 import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 
 
@@ -36,11 +37,10 @@ def create_event_dict(df):
 
 
 train_df, test_df = pandas_data_frame_creation()
-filtered_train_df = filter_by_risk(train_df, -4.0)
-sorted_train_df = sort_by_mission_id(filtered_train_df)
+#filtered_train_df = filter_by_risk(train_df, -4.0)
+sorted_train_df = sort_by_mission_id(train_df)
 cleaned_data = clean_data(sorted_train_df)
-print(cleaned_data.head(50))
-event_dict = create_event_dict(cleaned_data)
+caca_maca = cleaned_data.drop(columns = ['c_object_type'])
 
 def event_with_extreme_cdms(event_dict):
     max_event = None
@@ -63,3 +63,12 @@ max_event, max_cdms, min_event, min_cdms = event_with_extreme_cdms(event_dict)
 print(f"Event {max_event} has the maximum number of CDMs: {max_cdms}")
 print(f"Event {min_event} has the minimum number of CDMs: {min_cdms}")
 '''
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(caca_maca)
+pca = PCA(1)
+X_dimensinally_reduced = pca.fit_transform(X_train_scaled)
+print(X_dimensinally_reduced.shape)
+variance = pca.explained_variance_ratio_
+total_variance = np.sum(variance)
+print(f"Explained variance = {total_variance}")

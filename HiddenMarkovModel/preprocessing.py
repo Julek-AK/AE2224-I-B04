@@ -40,7 +40,7 @@ def cleanup(csv):
     return csv
 
 
-def generate_hmm_data(filename, risk_threshold=-6, traindata= True, verbose=False):
+def generate_hmm_data(filename, risk_threshold=-6, traindata=True, verbose=False):
     """
     Processes the raw dataset into a format accepted by hidden markov models
     the resulting dataframe has columns:

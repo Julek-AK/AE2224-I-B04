@@ -1,6 +1,9 @@
 import numpy as np
-from hmmLearnAlgorithm import idealPrediction, scores
+from hmmLearnAlgorithm import idealPrediction, predictAndScore, predictNext, averagePredictions
 from splitData import splitSet, formatData
+import pickle
+import os
+
 
 lengths = []
 
@@ -14,8 +17,21 @@ valObservations, valOutcomes = formatData("HMM_validation_set.csv", validation=T
 
 # train model with train set
 model1 = idealPrediction(squishedObservations, lengths, 30)
-print(f'transmat {model1.transmat_}')
+# with open("HiddenMarkovModel\\hmmModel1.pkl", "wb") as f: pickle.dump(model1, f)
+
+#print(f'transmat {model1.transmat_}')
 
 # check with validation model and get score
-nextScore, lastScore = scores(model1, valObservations, valOutcomes, steps = 3)
-print(f'next: {round(nextScore, 3)}%, last: {round(lastScore, 3)}%')
+# predictions, nextScore, lastScore = predictAndScore(model1, valObservations, valOutcomes, steps = 3)
+# print(f'next: {round(nextScore, 3)}%, last: {round(lastScore, 3)}%')
+# file = open("hmmModel.pkl", 'rb')
+# model1 = pickle.load(file)
+# path = os.path.abspath("hmmModel1.pkl")
+
+# print(f"Checking path: {path}")
+# print(f"File exists: {os.path.exists(path)}")
+# with open(path, "rb") as f:
+#     model1 = pickle.load(f)
+# model1 = pickle.load(open('hmmModel.pkl', 'rb'))
+for observation in observations:
+    print(averagePredictions(model1, observation, 3, 3))

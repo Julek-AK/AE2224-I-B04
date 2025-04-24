@@ -5,7 +5,7 @@ import numpy as np
 
 def splitSet(dataName, cutPerc):
 
-    dataSet =  pd.read_csv(rf"DataSets\{dataName}")
+    dataSet =  pd.read_csv(rf"DataSets\\{dataName}")
 
     # Split the data into training and validation sets
     trainDf, valDf = train_test_split(dataSet, test_size=cutPerc, random_state=42)
@@ -15,8 +15,8 @@ def splitSet(dataName, cutPerc):
     print(rf"Training set length: {len(trainDf)}")
 
     # Save the dataframes to CSV files
-    valDf.to_csv("DataSets\HMM_validation_set.csv", index=False)
-    trainDf.to_csv("DataSets\HMM_training_set.csv", index=False)
+    valDf.to_csv("DataSets\\HMM_validation_set.csv", index=False)
+    trainDf.to_csv("DataSets\\HMM_training_set.csv", index=False)
 
     return
 
