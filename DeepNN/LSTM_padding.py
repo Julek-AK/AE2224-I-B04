@@ -23,9 +23,9 @@ def data_create(data_type):
     filtered = [(seq, length) for seq, length in zip(sequences, lengths) if seq[-1][2] != -30]
 
     sequences, lengths = zip(*filtered)
-   
+    lengths = [length for length in lengths if length > 1]  # Filter out empty sequences
     # Scale each sequence individually
-    scaled_sequences = [torch.tensor(scaler.transform(seq[:-1]), dtype=torch.float32) for seq in sequences]
+    scaled_sequences = [torch.tensor(scaler.transform(seq[:-1]), dtype=torch.float32) for seq in sequences if len(seq) > 1]
 
     # Pad to (batch, max_len, features)
     targets = torch.tensor([seq[-1][2] for seq in sequences], dtype=torch.float32).unsqueeze(1)
@@ -46,7 +46,7 @@ padded_validation, targets_validation, lengths_validation = data_create("validat
 
 # Model setup
 input_size = padded_train.shape[2]  # e.g. 5 features
-model = LSTMRegressor(input_size=input_size, hidden_size=100, num_layers=3, bidirectional=False,dropout=0.35).to(device)  # Move model to device
+model = LSTMRegressor(input_size=input_size, hidden_size=50, num_layers=2, bidirectional=True,dropout=0.35).to(device)  # Move model to device
 def lossfn(outputs, targets):
     criterion1 = nn.MSELoss()
     criterion2 = nn.L1Loss()
@@ -58,9 +58,9 @@ best_val_loss = float('inf')
 patience = 5
 patience_counter = 0
 
-optimizer = optim.Adam(model.parameters(),lr=0.001,weight_decay=1e-4)
+optimizer = optim.Adam(model.parameters(),lr=0.005,weight_decay=1e-4)
 # Training loop
-num_epochs = 1000
+num_epochs = 5000
 for epoch in range(num_epochs):
     model.train()
 
@@ -108,10 +108,10 @@ with torch.no_grad():
 # Print the results
 
 outputs_test = outputs_test.cpu().squeeze().tolist()  # Move to CPU and convert to list for plotting
-outputs_test = [x+1 for x in outputs_test]  # Adjust the output values
+# outputs_test = [x+1 for x in outputs_test]  # Adjust the output values
 targets_test = targets_test.cpu().squeeze().tolist()  # Move to CPU and convert to list for plotting
 outputs_validation = outputs_validation.cpu().squeeze().tolist()  # Move to CPU and convert to list for plotting
-outputs_validation = [x+1 for x in outputs_validation]  # Adjust the output values
+# outputs_validation = [x+1 for x in outputs_validation]  # Adjust the output values
 targets_validation = targets_validation.cpu().squeeze().tolist()  # Move to CPU and convert to list for plotting
 
 
@@ -123,7 +123,10 @@ def scoring(outputs, targets):
     square_differences = []
     for i in range(len(outputs)):
         if targets[i] > -6:
-            square_differences.append((outputs[i] - targets[i])**2)
+            if outputs[i] < -6:
+                square_differences.append((-6.001 - targets[i])**2)
+            else:
+                square_differences.append((outputs[i] - targets[i])**2)
     MSE = np.sum(square_differences) / len(square_differences)
     steps = [i for i in range(len(outputs))]
     plt.title("Test Results")
