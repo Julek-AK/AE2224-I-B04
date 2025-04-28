@@ -37,7 +37,6 @@ def idealPrediction(obs, lens, nIter):
     # returns the best performing model
     return models[np.argmax(fitScores)]
 
-
 # https://github.com/hmmlearn/hmmlearn/issues/171
 def predictNext(model, observationList, steps = 1, binary = True):
     '''Function to predict a future sequence of observations
