@@ -1,8 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from imblearn.over_sampling import SMOTE
 
 
 
@@ -16,7 +13,7 @@ def filter_by_risk(df, risk):
     valid_event_ids = event_ids_to_remove[event_ids_to_remove == False].index
     return df[df['event_id'].isin(valid_event_ids)]
 
-def sort_by_mission_id(df):
+def sort_by_event_id(df):
         return df.sort_values(by = ['event_id', 'time_to_tca'], ascending=[1, 0])
 
 def clean_data(df):
@@ -36,11 +33,6 @@ def create_event_dict(df):
         event_dict[event_id] = event_array
     return event_dict
 
-def labelling_by_risk(df, risk):
-    event_ids_to_remove = df.groupby('event_id')['risk'].max() < risk
-    valid_event_ids = event_ids_to_remove[event_ids_to_remove == False].index
-    return df[df['event_id'].isin(valid_event_ids)]
-
 def event_with_extreme_cdms(event_dict):
     max_event = None
     max_cdms = -1  # start with a very low number
@@ -57,51 +49,6 @@ def event_with_extreme_cdms(event_dict):
             min_event = event_id
     return max_event, max_cdms, min_event, min_cdms
 
-def labelling_function(risk_dict):  
-    rows =[]
-    for eid, arr in risk_dict.items():
-        risk_vals = arr[:, 0]
-        ttc_vals  = arr[:, 1]
-        rows.append({
-            'event_id':      eid,
-            'risk_max':    risk_vals.max(),
-            'ttc_min':      ttc_vals.min(),
-    })  
-    df_evt = pd.DataFrame(rows).set_index('event_id')
-    threshold = -6.0
-    df_evt['risk_label'] = np.where(
-    df_evt['risk_max'] >= threshold,
-    'high_risk',
-    'low_risk'
-    )
-    return df_evt
-
-
-
-
 train_df, test_df = pandas_data_frame_creation()
-sorted_train_df = sort_by_mission_id(train_df)
-cleaned_data = clean_data(sorted_train_df)
-dictionary = create_event_dict(cleaned_data)
-risk_df = labelling_function(dictionary)
-print(risk_df['risk_label'].value_counts())
-
-
-X = risk_df[['risk_max','ttc_min']].values
-y = risk_df['risk_label'].values
-
-
-n_min = (y == 'high_risk').sum()
-k    = max(1, min(5, n_min - 1))
-
-sm = SMOTE(k_neighbors=k, random_state=42)
-X_res, y_res = sm.fit_resample(X, y)
-
-# ——— 4) Reassemble into a DataFrame ———
-df_res = pd.DataFrame(
-    X_res,
-    columns=['risk_max','ttc_min']
-)
-df_res['risk_label'] = y_res
-
-print(df_res['risk_label'].value_counts())
+sorted_train_df = sort_by_event_id(train_df)
+print(sorted_train_df.shape)
