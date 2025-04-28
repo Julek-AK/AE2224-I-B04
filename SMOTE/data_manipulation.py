@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-#from imbalanced_ts.over_sampling import SMOTE_TS
+import matplotlib.pyplot as plt
+from typing import List, Tuple
 
 
 
@@ -35,6 +34,39 @@ def create_event_dict(df):
         event_array = group[['risk', 'time_to_tca']].to_numpy()  
         event_dict[event_id] = event_array
     return event_dict
+
+def label_events_by_risk(df: pd.DataFrame, threshold: float = -6.0) -> pd.DataFrame:
+    """
+    Labels each CDM row in df as 'high_risk' or 'low_risk' according to
+    whether its event's maximum log10(risk) ≥ threshold.
+
+    Parameters:
+      df        – DataFrame with at least ['event_id','risk'] columns
+      threshold – log10-risk cutoff (default: -6.0)
+
+    Returns:
+      A copy of df with a new column 'risk_label'.
+    """
+    df = df.copy()
+
+    # 1) Compute each event’s maximum log-risk, broadcast to its rows
+    df['event_max_risk'] = (
+        df.groupby('event_id')['risk']
+          .transform('max')
+    )
+
+    # 2) Assign: high_risk if any CDM’s risk ≥ threshold
+    df['risk_label'] = np.where(
+        df['event_max_risk'] >= threshold,
+        'high_risk',
+        'low_risk'
+    )
+
+    # 3) Drop helper
+    df.drop(columns=['event_max_risk'], inplace=True)
+
+    return df
+
 
 def build_event_sequences(df: pd.DataFrame,
                           threshold: float = -6.0
@@ -85,9 +117,208 @@ def flatten_sequences_to_df(X_res: list[np.ndarray],
             })
     return pd.DataFrame(rows)
 
-df3 = (
-    train_df
+def dtw_path(s: np.ndarray, t: np.ndarray):
+    """
+    Compute the DTW alignment path between two sequences s and t.
+    Each is an array of shape (n_timesteps, n_features).
+    Returns a list of index pairs (i, j) that align s[i] with t[j].
+    """
+    n, m = len(s), len(t)
+    # Initialize cost matrix with infinities
+    cost = np.full((n + 1, m + 1), np.inf)
+    cost[0, 0] = 0.0
+    # Fill cost matrix
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            dist = np.linalg.norm(s[i - 1] - t[j - 1])
+            cost[i, j] = dist + min(cost[i - 1, j], cost[i, j - 1], cost[i - 1, j - 1])
+    # Backtrack to build the warping path
+    path: List[Tuple[int, int]] = []
+    i, j = n, m
+    while (i > 0) or (j > 0):
+        path.append((i - 1, j - 1))
+        # Determine next step
+        moves = []
+        if i > 0 and j > 0:
+            moves.append((cost[i - 1, j - 1], i - 1, j - 1))
+        if i > 0:
+            moves.append((cost[i - 1, j], i - 1, j))
+        if j > 0:
+            moves.append((cost[i, j - 1], i, j - 1))
+        _, i, j = min(moves, key=lambda x: x[0])
+    path.reverse()
+    return path
+
+def custom_sequence_smote(
+    X_seq: List[np.ndarray],
+    y: np.ndarray,
+    k_neighbors: int = 3,
+    sampling_strategy: float = 0.5,
+    random_state: int = 42
+):
+    """
+    From-scratch Sequence-SMOTE using DTW without external SMOTE libraries.
+
+    Parameters:
+      - X_seq: list of event sequences, each an (n_cdms, 2) array.
+      - y: array of 'high_risk'/'low_risk' labels per sequence.
+      - k_neighbors: number of DTW-neighbors to consider.
+      - sampling_strategy: desired fraction of high-risk after oversampling.
+      - random_state: seed for reproducibility.
+
+    Returns:
+      - X_res: original + synthetic sequences
+      - y_res: balanced labels array
+    """
+    np.random.seed(random_state)
+    # Identify high-risk indices
+    high_idx = np.where(y == 'high_risk')[0]
+    low_count = int(np.sum(y == 'low_risk'))
+    high_count = len(high_idx)
+
+    # Compute how many synthetic high-risk sequences are needed
+    if sampling_strategy <= 0 or sampling_strategy >= 1:
+        raise ValueError("sampling_strategy must be in (0, 1)")
+    target_high = int(np.round(low_count * sampling_strategy / (1.0 - sampling_strategy)))
+    n_synth = max(0, target_high - high_count)
+    # If nothing to do or not enough high-risk to find neighbors, return originals
+    if n_synth == 0 or high_count < 2:
+        return X_seq, y
+
+    # Bound k_neighbors
+    k = min(k_neighbors, high_count - 1)
+
+    # Precompute pairwise DTW distances among high-risk events
+    dist = np.zeros((high_count, high_count))
+    for i in range(high_count):
+        for j in range(i + 1, high_count):
+            path = dtw_path(X_seq[high_idx[i]], X_seq[high_idx[j]])
+            # sum Euclidean distances along path
+            dsum = sum(np.linalg.norm(X_seq[high_idx[i]][p] - X_seq[high_idx[j]][q]) for p, q in path)
+            dist[i, j] = dist[j, i] = dsum
+
+    # Generate synthetic sequences
+    synth_seqs: List[np.ndarray] = []
+    per_original = int(np.ceil(n_synth / high_count))
+    for idx_pos, seq_idx in enumerate(high_idx):
+        # Determine nearest neighbors by DTW distance
+        neighbors = high_idx[np.argsort(dist[idx_pos])[1 : k + 1]]
+        for _ in range(per_original):
+            if len(synth_seqs) >= n_synth:
+                break
+            nbr_idx = np.random.choice(neighbors)
+            s1, s2 = X_seq[seq_idx], X_seq[nbr_idx]
+            path = dtw_path(s1, s2)
+            aligned1 = np.array([s1[i] for i, _ in path])
+            aligned2 = np.array([s2[j] for _, j in path])
+            lam = np.random.rand()
+            synth = aligned1 + lam * (aligned2 - aligned1)
+            synth_seqs.append(synth)
+        if len(synth_seqs) >= n_synth:
+            break
+
+    # Combine originals with synthetic
+    X_res = X_seq + synth_seqs
+    y_res = np.concatenate([y, np.array(['high_risk'] * len(synth_seqs))])
+    return X_res, y_res
+
+def plot_sequence_length_histogram(df_raw, df_bal, synthetic_prefix="synthetic_"):
+    """
+    Plot histogram of CDM counts per event for raw vs. synthetic events.
+    """
+    # Raw sequence lengths
+    raw_counts = df_raw.groupby('event_id').size()
+    # Synthetic sequence lengths
+    syn_ids = [eid for eid in df_bal['event_id'].unique() if str(eid).startswith(synthetic_prefix)]
+    syn_counts = df_bal[df_bal['event_id'].isin(syn_ids)].groupby('event_id').size()
+
+    plt.figure()
+    plt.hist(raw_counts, bins=30, alpha=0.7, label='Raw events')
+    plt.hist(syn_counts, bins=30, alpha=0.7, label='Synthetic events')
+    plt.xlabel('Number of CDMs per event')
+    plt.ylabel('Count of events')
+    plt.title('Distribution of Sequence Lengths')
+    plt.legend()
+    plt.show()
+
+def plot_example_trajectories(df_raw, df_bal, n_examples=3, synthetic_prefix="synthetic_"):
+    """
+    Overlay example risk vs time-to-TCA curves for a few real and synthetic high-risk events.
+    """
+    # Select example real high-risk event IDs
+    real_ids = df_raw[df_raw['risk_label'] == 'high_risk']['event_id'].unique()[:n_examples]
+    # Select example synthetic high-risk event IDs
+    syn_ids = [eid for eid in df_bal['event_id'].unique()
+               if str(eid).startswith(synthetic_prefix)
+               and df_bal[df_bal['event_id'] == eid]['risk_label'].iat[0] == 'high_risk'][:n_examples]
+
+    plt.figure()
+    # Plot real events
+    for eid in real_ids:
+        grp = df_raw[df_raw['event_id'] == eid].sort_values('time_to_tca')
+        plt.plot(grp['time_to_tca'], grp['risk'], linestyle='-', label=f'Real {eid}')
+    # Plot synthetic events
+    for eid in syn_ids:
+        grp = df_bal[df_bal['event_id'] == eid].sort_values('time_to_tca')
+        plt.plot(grp['time_to_tca'], grp['risk'], linestyle='--', label=f'Synth {eid}')
+
+    plt.xlabel('Time to TCA (days)')
+    plt.ylabel('Log10 Risk')
+    plt.title('Example High-Risk Event Trajectories')
+    plt.legend()
+    plt.show()
+
+if __name__ == "__main__":
+    # 1) Load & preprocess
+    train_df, _ = pandas_data_frame_creation()
+    df_raw = (
+        train_df
         .pipe(sort_by_mission_id)
         .pipe(clean_data)
-)
-print(df3.shape, df3.head(20))
+    )
+
+    # 2) Label at the DataFrame level—so plotting has risk_label
+    df_raw = label_events_by_risk(df_raw, threshold=-6.0)
+
+    # 3) Build event‐level sequences and labels
+    X_seq, y, ids = build_event_sequences(df_raw, threshold=-6.0)
+    print(f"Built {len(X_seq)} event sequences:")
+    print("  High-risk events:", (y == 'high_risk').sum())
+    print("  Low-risk  events:", (y == 'low_risk').sum())
+
+    # 4) Apply our from-scratch SMOTE-TS
+    X_res, y_res = custom_sequence_smote(
+        X_seq,
+        y,
+        k_neighbors=3,
+        sampling_strategy=0.4,
+        random_state=42
+    )
+    print(f"After SMOTE-TS, total events: {len(X_res)}")
+    print("  High-risk events:", (y_res == 'high_risk').sum())
+    print("  Low-risk  events:", (y_res == 'low_risk').sum())
+
+    # 5) Flatten back into a CDM‐level DataFrame
+    df_balanced = flatten_sequences_to_df(
+        X_res,
+        y_res,
+        original_ids=ids,
+        threshold=-6.0
+    )
+
+    # 6) Quick sanity‐check on the flattened DataFrame
+    print("Balanced CDM‐level DataFrame:")
+    print("  Total rows (CDMs):", len(df_balanced))
+    print("  Unique events:", df_balanced['event_id'].nunique())
+    print("  Event label counts:")
+    print(
+        df_balanced
+        .groupby('event_id')['risk_label']
+        .first()
+        .value_counts()
+    )
+    plot_sequence_length_histogram(df_raw, df_balanced)
+    plot_example_trajectories(df_raw, df_balanced, n_examples=3)
+
+
+
