@@ -21,8 +21,19 @@ def splitSet(dataName, cutPerc):
     return
 
 def formatData(dataName, validation = False):
-    '''Takes the input from the database and reformats it
-    returns two arrays'''
+    '''
+    Takes the input from the database and reformats it
+    returns two arrays
+    input: 
+    - dataName: part of the DataSets file, string
+    - validation: if true, outcomes are also returned
+
+    returns: 
+    - formatted data for HMM analysis
+    - if validation is true, also the outcomes for each observation
+
+
+    '''
     observations = list()
     lengths = list()
 
