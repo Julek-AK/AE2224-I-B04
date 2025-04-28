@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     model1 = idealPrediction(squishedObservations, lengths, 30)
 
-    future, nonBinary = predictAndScore(model1, valObservations, valOutcomes, steps=3, score=False)
+    future, nonBinary, _ = predictAndScore(model1, valObservations, valOutcomes, steps=3, score=False)
 
     print(future)
     print(nonBinary)
