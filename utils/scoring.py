@@ -9,18 +9,19 @@ those used for predictions
 import numpy as np
 from sklearn import metrics
 import pandas as pd
+import os
 
 # Internal imports
 
 
 
 # Generate test_data used for benchmarking
-test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0,1,3])
+assert os.path.exists("Datasets\\test_data_shifted.csv"), "Generate shifted test data before benchmarking!"
+
+test_data = pd.read_csv("DataSets\\test_data_shifted.csv", usecols=[0,1,3])
 test_data.dropna(inplace=True)
 test_data.drop_duplicates(inplace=True)
-
-# Correct for missing CDMs from 2 days up to TCA
-test_data['time_to_tca'] -= 2
+print(test_data)
 
 clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
 for event_id, df in test_data.groupby('event_id'):

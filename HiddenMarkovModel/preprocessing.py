@@ -158,7 +158,7 @@ def generate_hmm_data(filename, risk_threshold=-6, traindata=True, verbose=False
         data = data.iloc[:, :2]
 
 
-    data.to_csv(f"./DataSets/HMM_{filename}")
+    data.to_csv(f"./DataSets/HMM_{filename}", index=False)
     print(f"Data saved as HMM_{filename}")
             
 
