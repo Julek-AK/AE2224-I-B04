@@ -6,6 +6,9 @@ import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
+
+StepToPredict = 200
 
 
 # Synthetic sine wave data for example
@@ -49,7 +52,7 @@ dataset = TensorDataset(X, y)
 loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 # Training loop
-for epoch in range(30):
+for epoch in range(200):
     for xb, yb in loader:
         xb = xb.to(device)
         yb = yb.to(device)
@@ -66,20 +69,20 @@ preds = []
 last_seq = X[-1].unsqueeze(0)  # Last sequence for prediction
 
 with torch.no_grad():
-    for _ in range(30):  # Predict 30 time steps ahead
+    for _ in range(StepToPredict):  # Predict 30 time steps ahead
         pred = model(last_seq)              # (1, 1)
         new_step = pred.unsqueeze(2)        # (1, 1, 1)
         preds.append(pred.item())
         last_seq = torch.cat([last_seq[:, 1:, :], new_step], dim=1)  # (1, seq_len, 1)
 
 # Actual future values (ground truth)
-true_future = data[-30:]
+true_future = data[-StepToPredict:]
 
 # Plotting
-x_train = list(range(len(data) - 30))
-x_pred = list(range(len(data) - 30, len(data)))
+x_train = list(range(len(data) - StepToPredict))
+x_pred = list(range(len(data) - StepToPredict, len(data)))
 plt.figure(figsize=(12, 6))
-plt.plot(x_train, data[:-30], label='Training Data')
+plt.plot(x_train, data[:-StepToPredict], label='Training Data')
 plt.plot(x_pred, true_future, label='Actual Future', color='green')
 plt.plot(x_pred, preds, label='Predicted Future', color='red', linestyle='--')
 plt.title("LSTM Time Series Forecasting")
