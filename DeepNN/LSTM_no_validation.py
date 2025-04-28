@@ -12,19 +12,6 @@ import sys
 import seaborn as sns
 
 
-#Make predictions
-model.eval()
-preds = []
-last_seq = X[-1].unsqueeze(0)  # Last sequence for prediction
-
-with torch.no_grad():
-    for _ in range(StepToPredict):  # Predict 30 time steps ahead
-        pred = model(last_seq)              # (1, 1)
-        new_step = pred.unsqueeze(2)        # (1, 1, 1)
-        preds.append(pred.item())
-        last_seq = torch.cat([last_seq[:, 1:, :], new_step], dim=1)  # (1, seq_len, 1)
-
-
 # Check if CUDA is available, if so, use GPU; otherwise, fall back to CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
