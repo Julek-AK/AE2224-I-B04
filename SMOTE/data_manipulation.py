@@ -67,7 +67,6 @@ def label_events_by_risk(df: pd.DataFrame, threshold: float = -6.0) -> pd.DataFr
 
     return df
 
-
 def build_event_sequences(df: pd.DataFrame,
                           threshold: float = -6.0
                          ) -> tuple[list[np.ndarray], np.ndarray, list]:
