@@ -2,9 +2,20 @@ import numpy as np
 from hmmlearn import hmm
 
 
-def idealPrediction(obs, lens, n_iter):
-    '''function finds the best model for observations (matrices),
-    returns a model'''
+def idealPrediction(obs, lens, nIter):
+    '''
+    function finds the best model for observations (matrices),
+    returns a model
+
+    inputs: 
+    - obs: array of observations, concatenate them into a single array shape (-1, 1)
+    - lens: list of lengths of each observation before it was concatenated to one array
+    - nIter: number of iterations to perform
+
+    outputs:
+    - best model HMMModel
+    
+    '''
     models = list()
     fitScores = list()
 
@@ -13,7 +24,7 @@ def idealPrediction(obs, lens, n_iter):
     for idx in range (50, 70):
 
         # iteration number can also be changed for a lower likelyhood of being stuck
-        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=n_iter)
+        model = hmm.CategoricalHMM(n_components = 2, random_state=idx, n_iter=nIter)
         model.fit(obs, lens)
         models.append(model)
 
@@ -68,19 +79,22 @@ def predictNext(model, observationList, steps = 1, binary = True):
 
     if binary :
         return nextSequence
-    
     else:
         return -6.001 if nextSequence[-1] == 0 else -5.34
 
 def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False, binary = False):
     '''
-    Predicts future risk based on a list of observations and also gives a score
+    Predicts future risk based on a list of observations and can also give a score
     inputs: 
     - model: trained HMM model
     - observations: sequence of high risk, low risk (array)
     - outcomes: high risk or low risk at TOC corresponding to each element in observations (array)
     - steps: how far in the future to predict (int)
     - score: use average scoring or not (bool)
+
+    outputs:
+    - if scoring is enabled: series of future binary predictions, score for one step and score for last step
+    - if not, then just the future predictions either binary or "real"
 
     '''
     scoreNext = 0
@@ -110,10 +124,21 @@ def predictAndScore(model, observations, outcomes, steps=1, score = True, verbos
 
     if score: 
         return futurePredictions, scoreNext, scoreLast
-
+    # if scoring is not needed, as it will be done later
     else: return futurePredictions
 
 def averagePredictions(model, observation, steps=1, avTimes=1):
+    '''
+    Function that makes multiple future predictions and averages them out for one prediction output
+    input:
+    - model: trained HMM model
+    - observation: list of a single observation to predict
+    - steps: how many steps in the future the prediction should be
+    - avTimes: how many predictions to average to get final prediction
+
+    output:
+    - array of rounded average of multiple prediction arrays
+    '''
     predictions = []
     for i in range(avTimes):
         predictions.append(predictNext(model, observation, steps = steps))

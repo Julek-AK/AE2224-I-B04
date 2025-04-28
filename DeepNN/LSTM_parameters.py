@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 from torch.nn.utils.rnn import pack_padded_sequence
 
+
 class LSTMRegressor(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers=1, bidirectional=False, dropout=0.0):
         super().__init__()
@@ -16,6 +17,8 @@ class LSTMRegressor(nn.Module):
         )
         direction_factor = 2 if bidirectional else 1
         self.fc = nn.Linear(hidden_size * direction_factor, 1)  # Output a single continuous value
+        self.log_sigma1 = nn.Parameter(torch.tensor(0.2))
+        self.log_sigma2 = nn.Parameter(torch.tensor(-0.2))
 
     def forward(self, x, lengths):
         packed = pack_padded_sequence(x, lengths, batch_first=True, enforce_sorted=True)
