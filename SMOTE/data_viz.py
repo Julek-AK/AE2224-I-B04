@@ -1,5 +1,6 @@
 # visualize_events.py
 import matplotlib.pyplot as plt
+import random
 
 def plot_cdm_counts(event_dict, plot_type="histogram"):
     """
@@ -29,9 +30,6 @@ def plot_cdm_counts(event_dict, plot_type="histogram"):
         plt.show()
     else:
         print("Unknown plot type. Use 'histogram' or 'bar'.")
-
-import random
-import matplotlib.pyplot as plt
 
 def plot_scatter_cdm(event_dict, plot_type='scatter', num_events=5):
     """
