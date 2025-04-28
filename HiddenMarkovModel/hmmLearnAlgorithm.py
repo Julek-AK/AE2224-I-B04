@@ -28,14 +28,25 @@ def idealPrediction(obs, lens, n_iter):
 
 
 # https://github.com/hmmlearn/hmmlearn/issues/171
-def predictNext(model, observations, steps = 1):
+def predictNext(model, observationList, steps = 1, binary = True):
     '''Function to predict a future sequence of observations
-    returns the prediction array'''
+    returns the prediction array or binary value of last prediction
+    
+    inputs: 
+    - model: trained hmm model
+    - observationList: a list composed of elements of a single observation
+    - steps: how far in the future to predict
+    - binary: to return a list of predictions, if true, or a final float value
+
+    returns:
+    - array of predictions with steps into the future
+    - single float if high or low risk
+    '''
     
     # Get the transition matrix from trained model
     transMatrix = model.transmat_
     # We only care about the last value in hidden
-    prediction = model.predict(observations)[-1]
+    prediction = model.predict(observationList)[-1]
 
     nextSequence = []
 
@@ -54,44 +65,55 @@ def predictNext(model, observations, steps = 1):
             # predicts the next element randomly based on the transition probability
             nextSequence.append(np.random.choice(np.arange(0, 2, 1), p=[transMatrix[prediction][0], transMatrix[prediction][1]]))
         steps -= 1
-    return nextSequence
 
-def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False):
+    if binary :
+        return nextSequence
+    
+    else:
+        return -6.001 if nextSequence[-1] == 0 else -5.34
+
+def predictAndScore(model, observations, outcomes, steps=1, score = True, verbose = False, binary = False):
+    '''
+    Predicts future risk based on a list of observations and also gives a score
+    inputs: 
+    - model: trained HMM model
+    - observations: sequence of high risk, low risk (array)
+    - outcomes: high risk or low risk at TOC corresponding to each element in observations (array)
+    - steps: how far in the future to predict (int)
+    - score: use average scoring or not (bool)
+
+    '''
     scoreNext = 0
     scoreLast = 0
-    predictNonBinary = []
+    futurePredictions = []
 
     # gets prediction
     for i, observation in enumerate(observations):
-        futurePrediction = averagePredictions(model, observation, steps = steps, avTimes = 3)
+        futurePrediction = predictNext(model, observation, steps = steps, binary=binary)
         if verbose:
             print(f"Predicted: {model.predict(observation)}")
             print(f'next prediction: {futurePrediction}')
         
-
-
-
-        if score:
+        if score and binary:
             #if predicted is correct, add point
             if futurePrediction[0] == outcomes[i][0]:
                 scoreNext += 1
 
             if futurePrediction[-1] == outcomes[i][-1]:
                 scoreLast += 1
-        else:
-            if outcomes[i][-1] == 0:
-                predictNonBinary.append(-6.001)
-            else: predictNonBinary.append(-5.34)
-    
-    if not score: return futurePrediction, predictNonBinary
+
+        futurePredictions.append(futurePrediction)
     
     # average to get percentage correct
     scoreNext = scoreNext / len(observations) * 100
     scoreLast = scoreLast/ len(observations) * 100
-    
-    return futurePrediction, scoreNext, scoreLast
 
-def averagePredictions(model, observation, steps = 1, avTimes = 1):
+    if score: 
+        return futurePredictions, scoreNext, scoreLast
+
+    else: return futurePredictions
+
+def averagePredictions(model, observation, steps=1, avTimes=1):
     predictions = []
     for i in range(avTimes):
         predictions.append(predictNext(model, observation, steps = steps))
