@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from imblearn.over_sampling import SMOTE
+#from imbalanced_ts.over_sampling import SMOTE_TS
 
 
 
@@ -36,72 +36,58 @@ def create_event_dict(df):
         event_dict[event_id] = event_array
     return event_dict
 
-def labelling_by_risk(df, risk):
-    event_ids_to_remove = df.groupby('event_id')['risk'].max() < risk
-    valid_event_ids = event_ids_to_remove[event_ids_to_remove == False].index
-    return df[df['event_id'].isin(valid_event_ids)]
+def build_event_sequences(df: pd.DataFrame,
+                          threshold: float = -6.0
+                         ) -> tuple[list[np.ndarray], np.ndarray, list]:
+    X_seq, y, ids = [], [], []
+    for eid, grp in df.groupby('event_id'):
+        arr = grp[['risk','time_to_tca']].to_numpy()
+        label = 'high_risk' if (arr[:,0] <= threshold).any() else 'low_risk'
+        X_seq.append(arr)
+        y.append(label)
+        ids.append(eid)
+    return X_seq, np.array(y), ids
 
-def event_with_extreme_cdms(event_dict):
-    max_event = None
-    max_cdms = -1  # start with a very low number
-    min_event = None
-    min_cdms = float('inf')  # start with a very high number
-    
-    for event_id, cdm_array in event_dict.items():
-        num_cdms = cdm_array.shape[0]
-        if num_cdms > max_cdms:
-            max_cdms = num_cdms
-            max_event = event_id
-        if num_cdms < min_cdms:
-            min_cdms = num_cdms
-            min_event = event_id
-    return max_event, max_cdms, min_event, min_cdms
+def apply_sequence_smote(X_seq: list[np.ndarray],
+                         y: np.ndarray,
+                         k_neighbors: int = 3,
+                         random_state: int = 42
+                        ) -> tuple[list[np.ndarray], np.ndarray]:
+    sm = SMOTE_TS(k_neighbors=k_neighbors, random_state=random_state)
+    X_res, y_res = sm.fit_resample(X_seq, y)
+    return X_res, y_res
 
-def labelling_function(risk_dict):  
-    rows =[]
-    for eid, arr in risk_dict.items():
-        risk_vals = arr[:, 0]
-        ttc_vals  = arr[:, 1]
-        rows.append({
-            'event_id':      eid,
-            'risk_max':    risk_vals.max(),
-            'ttc_min':      ttc_vals.min(),
-    })  
-    df_evt = pd.DataFrame(rows).set_index('event_id')
-    threshold = -6.0
-    df_evt['risk_label'] = np.where(
-    df_evt['risk_max'] >= threshold,
-    'high_risk',
-    'low_risk'
-    )
-    return df_evt
+def flatten_sequences_to_df(X_res: list[np.ndarray],
+                            y_res: np.ndarray,
+                            original_ids: list,
+                            threshold: float = -6.0
+                           ) -> pd.DataFrame:
+    orig_map = {
+        tuple(arr.flatten()): eid
+        for eid, arr in zip(original_ids, X_res[:len(original_ids)])
+    }
 
+    rows = []
+    syn_count = 0
+    for arr, label in zip(X_res, y_res):
+        key = tuple(arr.flatten())
+        if key in orig_map:
+            eid = orig_map[key]
+        else:
+            syn_count += 1
+            eid = f"synthetic_{syn_count}"
+        for risk_val, ttc_val in arr:
+            rows.append({
+                'event_id':    eid,
+                'risk':        risk_val,
+                'time_to_tca': ttc_val,
+                'risk_label':  label
+            })
+    return pd.DataFrame(rows)
 
-
-
-train_df, test_df = pandas_data_frame_creation()
-sorted_train_df = sort_by_mission_id(train_df)
-cleaned_data = clean_data(sorted_train_df)
-dictionary = create_event_dict(cleaned_data)
-risk_df = labelling_function(dictionary)
-print(risk_df['risk_label'].value_counts())
-
-
-X = risk_df[['risk_max','ttc_min']].values
-y = risk_df['risk_label'].values
-
-
-n_min = (y == 'high_risk').sum()
-k    = max(1, min(5, n_min - 1))
-
-sm = SMOTE(k_neighbors=k, random_state=42)
-X_res, y_res = sm.fit_resample(X, y)
-
-# ——— 4) Reassemble into a DataFrame ———
-df_res = pd.DataFrame(
-    X_res,
-    columns=['risk_max','ttc_min']
+df3 = (
+    train_df
+        .pipe(sort_by_mission_id)
+        .pipe(clean_data)
 )
-df_res['risk_label'] = y_res
-
-print(df_res['risk_label'].value_counts())
+print(df3.shape, df3.head(20))
