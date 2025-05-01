@@ -67,6 +67,7 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
 
         true_data = true_data.reset_index(drop=True)
         model_prediction = model_prediction.reset_index(drop=True)
+    print(f"Evaluating {len(model_prediction)} entries...")
     
     # Get the numpy arrays
     predicted_risk = model_prediction['predicted_risk'].to_numpy()
@@ -99,7 +100,8 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
 
 if __name__ == "__main__":
     # Naive baseline
-    test_data = pd.read_csv(r"DataSets\test_data_shifted.csv", usecols=[0, 1, 3])
+    filename = "train_data.csv"
+    test_data = pd.read_csv(rf"DataSets\{filename}", usecols=[0, 1, 3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
 
@@ -121,4 +123,4 @@ if __name__ == "__main__":
 
     naive_baseline = clean_test_data.rename(columns={'event_id': 'event_id', 'true_risk': 'predicted_risk'})
 
-    benchmark(naive_baseline)
+    benchmark(naive_baseline, true_data=f"{filename}")
