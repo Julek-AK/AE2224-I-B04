@@ -73,7 +73,7 @@ def build_event_sequences(df: pd.DataFrame,
     X_seq, y, ids = [], [], []
     for eid, grp in df.groupby('event_id'):
         arr = grp[['risk','time_to_tca']].to_numpy()
-        label = 'high_risk' if (arr[:,0] > threshold).any() else 'low_risk'
+        label = 'high_risk' if (arr[:,0] >= threshold).any() else 'low_risk'
         X_seq.append(arr)
         y.append(label)
         ids.append(eid)
@@ -279,7 +279,8 @@ if __name__ == "__main__":
     print(f"Built {len(X_seq)} event sequences based on existing events and filtered data:")
     print("  High-risk events:", (y == 'high_risk').sum())
     print("  Low-risk  events:", (y == 'low_risk').sum())
-'''
+
+
     # 4) Apply our from-scratch SMOTE-TS
     X_res, y_res = custom_sequence_smote(
         X_seq,
@@ -288,10 +289,11 @@ if __name__ == "__main__":
         sampling_strategy=0.4,
         random_state=42
     )
+
     print(f"After SMOTE-TS, total events: {len(X_res)}")
     print("  High-risk events:", (y_res == 'high_risk').sum())
     print("  Low-risk  events:", (y_res == 'low_risk').sum())
-
+'''
     # 5) Flatten back into a CDM‐level DataFrame
     df_balanced = flatten_sequences_to_df(
         X_res,
@@ -313,7 +315,6 @@ if __name__ == "__main__":
     )
     plot_sequence_length_histogram(df_raw, df_balanced)
     plot_example_trajectories(df_raw, df_balanced, n_examples=3)
-    '''
-
+'''
 
 
