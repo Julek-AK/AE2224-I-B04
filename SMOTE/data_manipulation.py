@@ -281,7 +281,7 @@ if __name__ == "__main__":
     print("  Low-risk  events:", (y_res == 'low_risk').sum())
     print("Smote Finished RUNNING!")
 
-'''
+
     # 5) Flatten back into a CDM‐level DataFrame
     df_balanced = flatten_sequences_to_df(
         X_res,
@@ -289,20 +289,13 @@ if __name__ == "__main__":
         original_ids=ids,
         threshold=-6.0
     )
+    df_balanced.to_csv(f"./DataSets/SMOTE_data.csv", index=False)
 
     # 6) Quick sanity‐check on the flattened DataFrame
     print("Balanced CDM‐level DataFrame:")
     print("  Total rows (CDMs):", len(df_balanced))
     print("  Unique events:", df_balanced['event_id'].nunique())
     print("  Event label counts:")
-    print(
-        df_balanced
-        .groupby('event_id')['risk_label']
-        .first()
-        .value_counts()
-    )
-    plot_sequence_length_histogram(df_raw, df_balanced)
-    plot_example_trajectories(df_raw, df_balanced, n_examples=3)
-'''
+    
 
 
