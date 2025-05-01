@@ -73,20 +73,11 @@ def build_event_sequences(df: pd.DataFrame,
     X_seq, y, ids = [], [], []
     for eid, grp in df.groupby('event_id'):
         arr = grp[['risk','time_to_tca']].to_numpy()
-        label = 'high_risk' if (arr[:,0] <= threshold).any() else 'low_risk'
+        label = 'high_risk' if (arr[:,0] > threshold).any() else 'low_risk'
         X_seq.append(arr)
         y.append(label)
         ids.append(eid)
     return X_seq, np.array(y), ids
-
-def apply_sequence_smote(X_seq: list[np.ndarray],
-                         y: np.ndarray,
-                         k_neighbors: int = 3,
-                         random_state: int = 42
-                        ) -> tuple[list[np.ndarray], np.ndarray]:
-    sm = SMOTE_TS(k_neighbors=k_neighbors, random_state=random_state)
-    X_res, y_res = sm.fit_resample(X_seq, y)
-    return X_res, y_res
 
 def flatten_sequences_to_df(X_res: list[np.ndarray],
                             y_res: np.ndarray,
@@ -272,19 +263,23 @@ if __name__ == "__main__":
     train_df, _ = pandas_data_frame_creation()
     df_raw = (
         train_df
-        .pipe(sort_by_mission_id)
-        .pipe(clean_data)
-    )
+            .pipe(sort_by_mission_id)
+            .pipe(clean_data)
+        )
 
-    # 2) Label at the DataFrame level—so plotting has risk_label
+
     df_raw = label_events_by_risk(df_raw, threshold=-6.0)
 
+
     # 3) Build event‐level sequences and labels
+    
     X_seq, y, ids = build_event_sequences(df_raw, threshold=-6.0)
-    print(f"Built {len(X_seq)} event sequences:")
+    
+    #print(X_seq)
+    print(f"Built {len(X_seq)} event sequences based on existing events and filtered data:")
     print("  High-risk events:", (y == 'high_risk').sum())
     print("  Low-risk  events:", (y == 'low_risk').sum())
-
+'''
     # 4) Apply our from-scratch SMOTE-TS
     X_res, y_res = custom_sequence_smote(
         X_seq,
@@ -318,6 +313,7 @@ if __name__ == "__main__":
     )
     plot_sequence_length_histogram(df_raw, df_balanced)
     plot_example_trajectories(df_raw, df_balanced, n_examples=3)
+    '''
 
 
 
