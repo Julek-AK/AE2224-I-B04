@@ -12,19 +12,6 @@ import sys
 import seaborn as sns
 
 
-#Make predictions
-model.eval()
-preds = []
-last_seq = X[-1].unsqueeze(0)  # Last sequence for prediction
-
-with torch.no_grad():
-    for _ in range(StepToPredict):  # Predict 30 time steps ahead
-        pred = model(last_seq)              # (1, 1)
-        new_step = pred.unsqueeze(2)        # (1, 1, 1)
-        preds.append(pred.item())
-        last_seq = torch.cat([last_seq[:, 1:, :], new_step], dim=1)  # (1, seq_len, 1)
-
-
 # Check if CUDA is available, if so, use GPU; otherwise, fall back to CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
@@ -32,36 +19,67 @@ scaler = StandardScaler()
 all_data = torch.cat(DR.readData5('train')[0]).numpy()
 scaler.fit(all_data)  # Fit on training data
 # Load data
-def data_create(data_type):
+def data_create(data_type, min_steps=3):
     sequences, lengths = DR.readData5(data_type)
 
-    # Filter out sequences with target value == -30
     filtered = [(seq, length) for seq, length in zip(sequences, lengths) if seq[-1][2] != -30]
-    # separate long and short sequences
-    MIN_LENGTH = 5
-    long_sequences = [(seq, length) for seq, length in filtered if length >= MIN_LENGTH]
-    short_sequences = [seq for seq, length in filtered if length < MIN_LENGTH]
-    short_targets = torch.tensor([seq[-1][2] for seq in short_sequences], device=device).unsqueeze(1)  
 
-    sequences, lengths = zip(*long_sequences)
-    # Scale each sequence individually
-    scaled_sequences = [torch.tensor(scaler.transform(seq[:-1]), dtype=torch.float32) for seq in sequences]
-    # Pad to (batch, max_len, features)
-    targets = torch.tensor([seq[-1][2] for seq in sequences], dtype=torch.float32).unsqueeze(1)
-    padded = pad_sequence(scaled_sequences, batch_first=True)  # shape: [batch_size, max_seq_len, num_features]
-    lengths, perm_idx = torch.tensor(lengths).sort(descending=True)
-    padded = padded[perm_idx]
-    targets = targets[perm_idx]
+    input_sequences = []
+    input_lengths = []
+    targets = []
 
-    # Move data to device (GPU/CPU)
-    padded = padded.to(device)
-    targets = targets.to(device)
-    
-    return padded, targets, lengths, short_sequences, short_targets
+    short_sequences = []
+    short_targets = []
+
+    for seq, length in filtered:
+        # Find first index where time_to_tca < 2
+        cutoff_idx = None
+        for idx, step in enumerate(seq):
+            if step[1] < 2.0:  # time_to_tca < 2 days
+                cutoff_idx = idx
+                break
+        
+        if cutoff_idx is None or cutoff_idx < min_steps:
+            # If no such point is found, or not enough steps, consider it a "short sequence"
+            short_sequences.append(seq)
+            short_targets.append(seq[-1][2])
+        else:
+            # Keep sequence up to (but not including) the cutoff_idx
+            truncated_seq = seq[:cutoff_idx]
+            truncated_seq_tensor = torch.tensor(scaler.transform(truncated_seq), dtype=torch.float32)
+
+            input_sequences.append(truncated_seq_tensor)
+            input_lengths.append(len(truncated_seq_tensor))
+            targets.append(seq[-1][2])
+
+    if input_sequences:
+        padded_inputs = pad_sequence(input_sequences, batch_first=True)
+        lengths_tensor = torch.tensor(input_lengths)
+        lengths_sorted, sorted_indices = lengths_tensor.sort(descending=True)
+        
+        padded_inputs = padded_inputs[sorted_indices]
+        targets_tensor = torch.tensor(targets, dtype=torch.float32).unsqueeze(1)
+        targets_tensor = targets_tensor[sorted_indices]
+    else:
+        padded_inputs = torch.empty(0, 0, 0)
+        lengths_sorted = torch.empty(0)
+        targets_tensor = torch.empty(0)
+
+    # Move to device
+    padded_inputs = padded_inputs.to(device)
+    targets_tensor = targets_tensor.to(device)
+
+    if short_sequences:
+        short_targets_tensor = torch.tensor(short_targets, device=device).unsqueeze(1)
+    else:
+        short_sequences = []
+        short_targets_tensor = torch.empty(0, 1).to(device)
+
+    return padded_inputs, targets_tensor, lengths_sorted, short_sequences, short_targets_tensor
 
 # Load the datasets (train and test)
-padded_train, targets_train, lengths_train, short_sequences_train, short_targets_train = data_create("train")
-padded_test, targets_test, lengths_test, short_sequences_test, short_targets_test = data_create("test")
+padded_train, targets_train, lengths_train = data_create("train")
+padded_test, targets_test, lengths_test = data_create("test")
 
 # Model setup
 input_size = padded_train.shape[2]  # e.g. 5 features
@@ -155,44 +173,6 @@ for epoch in range(num_epochs):
     test_f2_scores.append(test_f2)
     test_mse_scores.append(test_mse)
 
-# Default prediction function (from first place method)
-def default_prediction(seq):
-    r_min2 = seq[-1][2]
-    if -6.04 <= r_min2 < -6:
-        return -5.95
-    elif -6.4 <= r_min2 < -6.04:
-        return -5.6
-    elif -7.3 <= r_min2 < -6.4:
-        return -5
-    elif -4 <= r_min2 < -3.5:
-        return -4
-    elif r_min2 >= -3.5:
-        return -3.5
-    else:
-        return -6.0001
-
-# Prediction function for both short and long sequences
-def predict_with_default(model, sequences, lengths, short_sequences):
-    preds = []
-
-    # First, predict for short sequences using default_prediction
-    for seq in short_sequences:
-        preds.append(default_prediction(seq))
-
-    # Then, predict for normal sequences using the model
-    for seq, length in zip(sequences, lengths):
-        seq = seq.unsqueeze(0).to(device)
-        length_tensor = torch.tensor([length], dtype=torch.long, device="cpu")
-        output = model(seq, length_tensor)
-        preds.append(output.item())
-    return torch.tensor(preds, device=device).unsqueeze(1)  # unsqueeze(1) to match target shape
-
-model.eval()
-with torch.no_grad():
-    # Predict both short and long sequences
-    outputs_test = predict_with_default(model, padded_test, lengths_test, short_sequences_test)
-# Comine targets for short and long sequences
-targets_test = torch.cat([short_targets_test, targets_test]).squeeze()
 
 #Scoring model + Plotting predictions
 def scoring(outputs, targets):
