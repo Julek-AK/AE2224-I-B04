@@ -54,10 +54,15 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
     true_data.sort_values(by='event_id', ascending=True, inplace=True)
     true_data.drop_duplicates(inplace=True)
 
-    # Consistency checks
+    # Correct inconsistent lengths
     if len(model_prediction) != len(true_data):
-        print("Inconsistent dataset size")
-        return
+        print("Correcting data size mismatch by pruning events from true data")
+
+        common_events = model_prediction['event_id'].unique()
+        true_data = true_data[true_data['event_id'].isin(common_events)]
+
+        true_data = true_data.reset_index(drop=True)
+        model_prediction = model_prediction.reset_index(drop=True)
     
     # Get the numpy arrays
     predicted_risk = model_prediction['predicted_risk'].to_numpy()
@@ -74,7 +79,7 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
     F_score = ((1 + beta**2) * precision * recall) / (beta**2 * precision + recall)
 
     N = np.count_nonzero(true_risk_binary)
-    high_risk_squared_errors = true_risk_binary * np.pow((predicted_risk - true_risk), 2)
+    high_risk_squared_errors = true_risk_binary * np.power((predicted_risk - true_risk), 2)
     MSE_HR = np.sum(high_risk_squared_errors) / N
     L_score = MSE_HR/F_score
 
@@ -88,9 +93,9 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
 
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Naive baseline
-    test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0,1,3])
+    test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0, 1, 3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
 

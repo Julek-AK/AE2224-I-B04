@@ -20,9 +20,20 @@ def splitSet(dataName, cutPerc):
 
     return
 
-def formatData(dataName, validation = False):
-    '''Takes the input from the database and reformats it
-    returns two arrays'''
+def formatData(dataName, validation = False, test = False):
+    '''
+    Takes the input from the database and reformats it
+    returns two arrays
+    input: 
+    - dataName: part of the DataSets file, string
+    - validation: if true, outcomes are also returned
+
+    returns: 
+    - formatted data for HMM analysis
+    - if validation is true, also the outcomes for each observation
+
+
+    '''
     observations = list()
     lengths = list()
 
@@ -30,6 +41,7 @@ def formatData(dataName, validation = False):
 
     # We need the observations no matter if it's the validation or training set
     observationList = dataSet['observations'].tolist()
+    
 
     # Formatting, as the data for some reason is a string, also converts it to the right shaped array
     for row in observationList:
@@ -41,7 +53,7 @@ def formatData(dataName, validation = False):
         observations.append(row)
         
     # If it's a validation set we don't need the lengths but we do need the outcomes to test against
-    if validation: 
+    if validation or test: 
         outcomes = list()
         outcomeList = dataSet['outcome'].tolist()
 
@@ -51,6 +63,9 @@ def formatData(dataName, validation = False):
             row = row[1:-1]
             row = np.array(list(map(int, row.split())))
             outcomes.append(row)
+        if test:
+            eventIDs = dataSet['event_id'].tolist()
+            return observations, outcomes, eventIDs
 
         return observations, outcomes
     
