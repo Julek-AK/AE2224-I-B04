@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
-
+from tqdm import tqdm
 
 
 def pandas_data_frame_creation ():
@@ -73,7 +73,7 @@ def build_event_sequences(df: pd.DataFrame,
     X_seq, y, ids = [], [], []
     for eid, grp in df.groupby('event_id'):
         arr = grp[['risk','time_to_tca']].to_numpy()
-        label = 'high_risk' if (arr[:,0] > threshold).any() else 'low_risk'
+        label = 'high_risk' if (arr[:,0] >= threshold).any() else 'low_risk'
         X_seq.append(arr)
         y.append(label)
         ids.append(eid)
@@ -145,53 +145,38 @@ def custom_sequence_smote(
     k_neighbors: int = 3,
     sampling_strategy: float = 0.5,
     random_state: int = 42
-):
+) -> Tuple[List[np.ndarray], np.ndarray]:
     """
-    From-scratch Sequence-SMOTE using DTW without external SMOTE libraries.
-
-    Parameters:
-      - X_seq: list of event sequences, each an (n_cdms, 2) array.
-      - y: array of 'high_risk'/'low_risk' labels per sequence.
-      - k_neighbors: number of DTW-neighbors to consider.
-      - sampling_strategy: desired fraction of high-risk after oversampling.
-      - random_state: seed for reproducibility.
-
-    Returns:
-      - X_res: original + synthetic sequences
-      - y_res: balanced labels array
+    Sequence-SMOTE with progress bars for long-running loops.
     """
     np.random.seed(random_state)
-    # Identify high-risk indices
     high_idx = np.where(y == 'high_risk')[0]
     low_count = int(np.sum(y == 'low_risk'))
     high_count = len(high_idx)
 
-    # Compute how many synthetic high-risk sequences are needed
     if sampling_strategy <= 0 or sampling_strategy >= 1:
         raise ValueError("sampling_strategy must be in (0, 1)")
     target_high = int(np.round(low_count * sampling_strategy / (1.0 - sampling_strategy)))
     n_synth = max(0, target_high - high_count)
-    # If nothing to do or not enough high-risk to find neighbors, return originals
     if n_synth == 0 or high_count < 2:
         return X_seq, y
 
-    # Bound k_neighbors
     k = min(k_neighbors, high_count - 1)
 
-    # Precompute pairwise DTW distances among high-risk events
+    # Precompute DTW distances with progress bar
     dist = np.zeros((high_count, high_count))
-    for i in range(high_count):
+    for i in tqdm(range(high_count), desc="Computing DTW distance rows"):
         for j in range(i + 1, high_count):
             path = dtw_path(X_seq[high_idx[i]], X_seq[high_idx[j]])
-            # sum Euclidean distances along path
             dsum = sum(np.linalg.norm(X_seq[high_idx[i]][p] - X_seq[high_idx[j]][q]) for p, q in path)
             dist[i, j] = dist[j, i] = dsum
 
-    # Generate synthetic sequences
+    # Generate synthetic sequences with progress bar
     synth_seqs: List[np.ndarray] = []
     per_original = int(np.ceil(n_synth / high_count))
+    total_iterations = high_count * per_original
+    pbar = tqdm(total=total_iterations, desc="Generating synthetic sequences")
     for idx_pos, seq_idx in enumerate(high_idx):
-        # Determine nearest neighbors by DTW distance
         neighbors = high_idx[np.argsort(dist[idx_pos])[1 : k + 1]]
         for _ in range(per_original):
             if len(synth_seqs) >= n_synth:
@@ -204,10 +189,11 @@ def custom_sequence_smote(
             lam = np.random.rand()
             synth = aligned1 + lam * (aligned2 - aligned1)
             synth_seqs.append(synth)
+            pbar.update(1)
         if len(synth_seqs) >= n_synth:
             break
+    pbar.close()
 
-    # Combine originals with synthetic
     X_res = X_seq + synth_seqs
     y_res = np.concatenate([y, np.array(['high_risk'] * len(synth_seqs))])
     return X_res, y_res
@@ -279,7 +265,8 @@ if __name__ == "__main__":
     print(f"Built {len(X_seq)} event sequences based on existing events and filtered data:")
     print("  High-risk events:", (y == 'high_risk').sum())
     print("  Low-risk  events:", (y == 'low_risk').sum())
-'''
+
+
     # 4) Apply our from-scratch SMOTE-TS
     X_res, y_res = custom_sequence_smote(
         X_seq,
@@ -288,10 +275,13 @@ if __name__ == "__main__":
         sampling_strategy=0.4,
         random_state=42
     )
+
     print(f"After SMOTE-TS, total events: {len(X_res)}")
     print("  High-risk events:", (y_res == 'high_risk').sum())
     print("  Low-risk  events:", (y_res == 'low_risk').sum())
+    print("Smote Finished RUNNING!")
 
+'''
     # 5) Flatten back into a CDM‐level DataFrame
     df_balanced = flatten_sequences_to_df(
         X_res,
@@ -313,7 +303,6 @@ if __name__ == "__main__":
     )
     plot_sequence_length_histogram(df_raw, df_balanced)
     plot_example_trajectories(df_raw, df_balanced, n_examples=3)
-    '''
-
+'''
 
 

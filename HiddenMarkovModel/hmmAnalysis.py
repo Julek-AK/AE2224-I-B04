@@ -24,7 +24,7 @@ testObservations, testOutcomes, testIDs = formatData("HMM_test_data_shifted.csv"
 
 # train model with train set
 model1 = idealPrediction(squishedObservations, lengths, 30)
-prediction= predictAndScore(model1, testObservations, testOutcomes, steps = 5, score = False, binary = False)
+prediction= predictAndScore(model1, valObservations, valOutcomes, steps = 5, score = False, binary = False)
 
 predictionPD = pd.DataFrame({'predicted_risk': prediction, 'event_id': testIDs})
 testOutcomePD = pd.DataFrame({'true_risk': testOutcomes, 'event_id': testIDs})
