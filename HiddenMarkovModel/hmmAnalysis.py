@@ -1,8 +1,12 @@
 import numpy as np
 from hmmLearnAlgorithm import idealPrediction, predictAndScore, predictNext, averagePredictions
 from splitData import splitSet, formatData
-import pickle
-import os
+import pandas as pd
+# import pickle
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.scoring import benchmark
 
 
 lengths = []
@@ -15,22 +19,18 @@ squishedObservations = np.concatenate(observations)
 # validation set
 valObservations, valOutcomes = formatData("HMM_validation_set.csv", validation=True)
 
+# test set
+testObservations, testOutcomes, testIDs = formatData("HMM_test_data_shifted.csv", test= True)
+
 # train model with train set
 model1 = idealPrediction(squishedObservations, lengths, 30)
-# with open("HiddenMarkovModel\\hmmModel1.pkl", "wb") as f: pickle.dump(model1, f)
+prediction= predictAndScore(model1, testObservations, testOutcomes, steps = 5, score = False, binary = False)
 
-#print(f'transmat {model1.transmat_}')
+predictionPD = pd.DataFrame({'predicted_risk': prediction, 'event_id': testIDs})
+testOutcomePD = pd.DataFrame({'true_risk': testOutcomes, 'event_id': testIDs})
 
-# check with validation model and get score
-# predictions, nextScore, lastScore = predictAndScore(model1, valObservations, valOutcomes, steps = 3)
-# print(f'next: {round(nextScore, 3)}%, last: {round(lastScore, 3)}%')
-# file = open("hmmModel.pkl", 'rb')
-# model1 = pickle.load(file)
-# path = os.path.abspath("hmmModel1.pkl")
+F_score, MSE_HR, L_score = benchmark(predictionPD)
 
-# print(f"Checking path: {path}")
-# print(f"File exists: {os.path.exists(path)}")
-# with open(path, "rb") as f:
-#     model1 = pickle.load(f)
-# model1 = pickle.load(open('hmmModel.pkl', 'rb'))
-predictAndScore(model1, valObservations, valOutcomes, steps = 3, score = False, binary = True)
+# print(f"fscore: {F_score}")
+# print(f"mse: {MSE_HR}")
+# print(f"Lscore: {L_score}")

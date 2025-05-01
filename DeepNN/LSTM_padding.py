@@ -22,7 +22,7 @@ def data_create(data_type):
 
     # Filter out sequences with target value == -30
     filtered = [(seq, length) for seq, length in zip(sequences, lengths) if seq[-1][2] != -30]
-    MIN_LENGTH = 5
+    MIN_LENGTH = 2
     long_sequences = [(seq, length) for seq, length in filtered if length >= MIN_LENGTH]
     short_sequences = [seq for seq, length in filtered if length < MIN_LENGTH]
     short_targets = torch.tensor([seq[-1][2] for seq in short_sequences], device=device).unsqueeze(1)  

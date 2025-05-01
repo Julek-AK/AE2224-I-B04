@@ -83,7 +83,7 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
     F_score = ((1 + beta**2) * precision * recall) / (beta**2 * precision + recall)
 
     N = np.count_nonzero(true_risk_binary)
-    high_risk_squared_errors = true_risk_binary * np.pow((predicted_risk - true_risk), 2)
+    high_risk_squared_errors = true_risk_binary * np.power((predicted_risk - true_risk), 2)
     MSE_HR = np.sum(high_risk_squared_errors) / N
     L_score = MSE_HR/F_score
 
