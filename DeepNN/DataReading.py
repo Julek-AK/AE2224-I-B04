@@ -66,6 +66,6 @@ def readData5(data_type):
 
     return grouped_events, lengths
 
-filter1 = [seq for seq in readData4("train")[0] if len(seq)>=7]
-filter2 = [seq for seq in filter1 if seq[-1][2] != -30]
-print(len(filter2))  # Count sequences longer than 5 in test set
+# filter1 = [seq for seq in readData4("train")[0] if len(seq)>=7]
+# filter2 = [seq for seq in filter1 if seq[-1][2] != -30]
+# print(len(filter2))  # Count sequences longer than 5 in test set
