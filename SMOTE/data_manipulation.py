@@ -63,7 +63,7 @@ def label_events_by_risk(df: pd.DataFrame, threshold: float = -6.0) -> pd.DataFr
     )
 
     # 3) Drop helper
-    df.drop(columns=['event_max_risk'], inplace=True)
+    #df.drop(columns=['event_max_risk'], inplace=True)
 
     return df
 
