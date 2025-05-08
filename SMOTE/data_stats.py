@@ -69,5 +69,4 @@ if __name__ == '__main__':
 
     print(f'Total CDMS after cleaning = {total_cdms}\n')
     print(f'Total number of events = {total_num_events}\n')
-    print(f'Total number of high-risk events {no_high_risk_events}\n')
-    print(f'Total number of low-risk events {low_risk_events}')
+    print(no_high_risk_events)
