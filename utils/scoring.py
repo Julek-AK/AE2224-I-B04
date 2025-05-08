@@ -15,27 +15,30 @@ import os
 
 
 
-# Generate test_data used for benchmarking
-assert os.path.exists("Datasets\\test_data_shifted.csv"), "Generate shifted test data before benchmarking!"
+def create_test_data(data_filename):
+    # Generate test_data used for benchmarking
+    assert os.path.exists(rf"Datasets\\{data_filename}"), "Generate test data before benchmarking!"
 
-test_data = pd.read_csv("DataSets\\test_data_shifted.csv", usecols=[0,1,3])
-test_data.dropna(inplace=True)
-test_data.drop_duplicates(inplace=True)
-print(test_data)
-
-clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
-for event_id, df in test_data.groupby('event_id'):
-
-    min_tca_time = df['time_to_tca'].min()
-    row = df[df['time_to_tca'] == min_tca_time]
-    risk = float(row['risk'].iloc[0])
-    
-    new_row = pd.DataFrame([{'event_id': event_id, 'true_risk': risk}])
-    clean_test_data = pd.concat([clean_test_data, new_row], ignore_index=True)
+    test_data = pd.read_csv(rf"DataSets\\{data_filename}", usecols=[0,1,3])
+    test_data.dropna(inplace=True)
+    test_data.drop_duplicates(inplace=True)
 
 
+    clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
+    for event_id, df in test_data.groupby('event_id'):
 
-def benchmark(model_prediction, true_data=clean_test_data, beta=2):
+        min_tca_time = df['time_to_tca'].min()
+        row = df[df['time_to_tca'] == min_tca_time]
+        risk = float(row['risk'].iloc[0])
+        
+        new_row = pd.DataFrame([{'event_id': event_id, 'true_risk': risk}])
+        clean_test_data = pd.concat([clean_test_data, new_row], ignore_index=True)
+
+    return clean_test_data
+
+
+
+def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
     """
     model_prediction: dataframe with columns 'event_id' and 'predicted_risk'
     IMPROTANT this is NOT a binary classifier of high/low risk, but an actual numerical value
@@ -51,6 +54,7 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
     # Sort and clean up
     model_prediction.sort_values(by='event_id', ascending=True, inplace=True)
     model_prediction.drop_duplicates(inplace=True)
+    true_data = create_test_data(true_data)
     true_data.sort_values(by='event_id', ascending=True, inplace=True)
     true_data.drop_duplicates(inplace=True)
 
@@ -63,6 +67,7 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
 
         true_data = true_data.reset_index(drop=True)
         model_prediction = model_prediction.reset_index(drop=True)
+    print(f"Evaluating {len(model_prediction)} entries...")
     
     # Get the numpy arrays
     predicted_risk = model_prediction['predicted_risk'].to_numpy()
@@ -79,7 +84,7 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
     F_score = ((1 + beta**2) * precision * recall) / (beta**2 * precision + recall)
 
     N = np.count_nonzero(true_risk_binary)
-    high_risk_squared_errors = true_risk_binary * np.power((predicted_risk - true_risk), 2)
+    high_risk_squared_errors = true_risk_binary * np.square(predicted_risk - true_risk)
     MSE_HR = np.sum(high_risk_squared_errors) / N
     L_score = MSE_HR/F_score
 
@@ -95,12 +100,10 @@ def benchmark(model_prediction, true_data=clean_test_data, beta=2):
 
 if __name__ == "__main__":
     # Naive baseline
-    test_data = pd.read_csv(r"DataSets\test_data.csv", usecols=[0, 1, 3])
+    filename = "train_data.csv"
+    test_data = pd.read_csv(rf"DataSets\{filename}", usecols=[0, 1, 3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
-
-    # Correct for missing CDMs from 2 days up to TCA
-    # test_data['time_to_tca'] -= 2
 
     clean_test_data = pd.DataFrame(columns=['event_id', 'true_risk'])
     for event_id, df in test_data.groupby('event_id'):
@@ -111,14 +114,13 @@ if __name__ == "__main__":
         try:
             second_min_tca_time = df2['time_to_tca'].min()
             row = df2[df2['time_to_tca'] == second_min_tca_time]
-            risk = float(row['risk'].iloc[0])
         except IndexError:
             row = df[df['time_to_tca'] == min_tca_time]
-            risk = float(df['risk'].iloc[0])
+        risk = float(df['risk'].iloc[0])
 
         new_row = pd.DataFrame([{'event_id': event_id, 'true_risk': risk}])
         clean_test_data = pd.concat([clean_test_data, new_row], ignore_index=True)
 
     naive_baseline = clean_test_data.rename(columns={'event_id': 'event_id', 'true_risk': 'predicted_risk'})
 
-    benchmark(naive_baseline)
+    benchmark(naive_baseline, true_data=f"{filename}")
