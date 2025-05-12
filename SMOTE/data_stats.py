@@ -63,7 +63,7 @@ def data_frame_statistics(df):
 if __name__ == '__main__':
     train_df = pandas_data_frame_creation()
     cleaned_data = clean_data(train_df)
-    new_labeled_data = label_events_by_risk(cleaned_data)
+    new_labeled_data = label_events_by_risk(train_df)
     sorted_data = sort_by_mission_id(new_labeled_data)
     total_cdms, total_num_events, no_high_risk_events, low_risk_events = data_frame_statistics(sorted_data)
 
