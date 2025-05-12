@@ -118,12 +118,12 @@ def generate_hmm_data(filename, risk_threshold=-6, smote=False, verbose=False):
                     else:
                         i+=1
 
-            # Pad-left
+            # Pad right
             for i in range(1, 15):
                 if risk_sequence[i] is None:
                     risk_sequence[i] = risk_sequence[i-1]
 
-            # Pad-right
+            # Pad left
             for i in range(2, 16):
                 if risk_sequence[-i] is None:
                     risk_sequence[-i] = risk_sequence[-i+1]
@@ -137,7 +137,6 @@ def generate_hmm_data(filename, risk_threshold=-6, smote=False, verbose=False):
         final_state = predictions[-1]
         prediction = (first_prediction, final_state)
 
-
         # Add to the dataset
         new_row = pd.DataFrame([{'event_id': event_id, 'observations': risk_sequence, 'outcome': prediction}])
         data = pd.concat([data, new_row], ignore_index=True)
@@ -149,4 +148,4 @@ def generate_hmm_data(filename, risk_threshold=-6, smote=False, verbose=False):
 if __name__ == '__main__':
     # generate_hmm_data("train_data.csv" )
     # generate_hmm_data("train_data.csv", verbose=False)
-    generate_hmm_data("SMOTE_data2.csv", smote=True, verbose=True)
+    generate_hmm_data("SMOTE_data3.csv", smote=True, verbose=True)

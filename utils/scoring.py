@@ -52,10 +52,10 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
     print("Benchmarking model...")
 
     # Sort and clean up
-    model_prediction.sort_values(by='event_id', ascending=True, inplace=True)
+    # model_prediction.sort_values(by='event_id', ascending=True, inplace=True)
     model_prediction.drop_duplicates(inplace=True)
     true_data = create_test_data(true_data)
-    true_data.sort_values(by='event_id', ascending=True, inplace=True)
+    # true_data.sort_values(by='event_id', ascending=True, inplace=True)
     true_data.drop_duplicates(inplace=True)
 
     # Correct inconsistent lengths
@@ -100,7 +100,7 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
 
 if __name__ == "__main__":
     # Naive baseline
-    filename = "SMOTE_data.csv"
+    filename = "SMOTE_data3.csv"
     test_data = pd.read_csv(rf"DataSets\{filename}", usecols=[0, 1, 3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
