@@ -12,17 +12,7 @@ import sys
 import seaborn as sns
 
 
-#Make predictions
-model.eval()
-preds = []
-last_seq = X[-1].unsqueeze(0)  # Last sequence for prediction
 
-with torch.no_grad():
-    for _ in range(StepToPredict):  # Predict 30 time steps ahead
-        pred = model(last_seq)              # (1, 1)
-        new_step = pred.unsqueeze(2)        # (1, 1, 1)
-        preds.append(pred.item())
-        last_seq = torch.cat([last_seq[:, 1:, :], new_step], dim=1)  # (1, seq_len, 1)
 
 
 # Check if CUDA is available, if so, use GPU; otherwise, fall back to CPU
@@ -61,7 +51,7 @@ def data_create(data_type):
 
 # Load the datasets (train and test)
 padded_train, targets_train, lengths_train, short_sequences_train, short_targets_train = data_create("train")
-padded_test, targets_test, lengths_test, short_sequences_test, short_targets_test = data_create("test")
+padded_test, targets_test, lengths_test, short_sequences_test, short_targets_test = data_create('test')
 
 # Model setup
 input_size = padded_train.shape[2]  # e.g. 5 features
