@@ -100,7 +100,7 @@ def benchmark(model_prediction, true_data="test_data_shifted.csv", beta=2):
 
 if __name__ == "__main__":
     # Naive baseline
-    filename = "train_data.csv"
+    filename = "SMOTE_data.csv"
     test_data = pd.read_csv(rf"DataSets\{filename}", usecols=[0, 1, 3])
     test_data.dropna(inplace=True)
     test_data.drop_duplicates(inplace=True)
@@ -123,4 +123,4 @@ if __name__ == "__main__":
 
     naive_baseline = clean_test_data.rename(columns={'event_id': 'event_id', 'true_risk': 'predicted_risk'})
 
-    benchmark(naive_baseline, true_data=f"{filename}")
+    benchmark(naive_baseline, true_data=filename)

@@ -40,7 +40,7 @@ def cleanup(csv):
     return csv
 
 
-def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
+def generate_hmm_data(filename, risk_threshold=-6, smote=False, verbose=False):
     """
     Processes the raw dataset into a format accepted by hidden markov models
     the resulting dataframe has columns:
@@ -57,7 +57,7 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
     print(f"Processing file {filename}")
 
     csv = pd.read_csv(rf"DataSets\{filename}")
-    csv = cleanup(csv)
+    if not smote: csv = cleanup(csv)  # Since SMOTE data has been cleaned beforehand
 
     # Additional cleanups
     csv = csv[csv['time_to_tca'] > 0]
@@ -144,9 +144,9 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
 
     data.to_csv(f"./DataSets/HMM_{filename}", index=False)
     print(f"Data saved as HMM_{filename}")
-            
+
 
 if __name__ == '__main__':
     # generate_hmm_data("train_data.csv" )
     # generate_hmm_data("train_data.csv", verbose=False)
-    generate_hmm_data("test_data_shifted.csv", verbose=True)
+    generate_hmm_data("SMOTE_data2.csv", smote=True, verbose=True)
