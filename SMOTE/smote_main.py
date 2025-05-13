@@ -250,7 +250,6 @@ if __name__ == "__main__":
     df_raw = (
         train_df
             .pipe(sort_by_mission_id)
-            .pipe(clean_data)
         )
 
 
@@ -289,7 +288,7 @@ if __name__ == "__main__":
         original_ids=ids,
         threshold=-6.0
     )
-    df_balanced.to_csv(f"./DataSets/SMOTE_data.csv", index=False)
+    df_balanced.to_csv(f"./DataSets/SMOTE_data_12_05.csv", index=False)
 
     # 6) Quick sanity‐check on the flattened DataFrame
     print("Balanced CDM‐level DataFrame:")

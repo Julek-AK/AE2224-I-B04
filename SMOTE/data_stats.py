@@ -60,13 +60,30 @@ def data_frame_statistics(df):
     low_risk_events = total_num_events - no_high_risk_events
     return total_cdms, total_num_events, no_high_risk_events, low_risk_events
 
+
+def smote_data_stats():
+    df = pd.read_csv("DataSets/SMOTE_data_12_05.csv")
+    total_syntethic_cdms = len(df)
+    total_num_events = df['event_id'].nunique()
+    event_labels = df.groupby('event_id')['risk_label'].first()
+    no_high_risk_events = event_labels.value_counts()
+    low_risk_events = total_num_events - no_high_risk_events
+    return total_syntethic_cdms, total_num_events, no_high_risk_events, low_risk_events
+    
+
 if __name__ == '__main__':
     train_df = pandas_data_frame_creation()
-    cleaned_data = clean_data(train_df)
     new_labeled_data = label_events_by_risk(train_df)
     sorted_data = sort_by_mission_id(new_labeled_data)
     total_cdms, total_num_events, no_high_risk_events, low_risk_events = data_frame_statistics(sorted_data)
+    total_syntethic_cdms, total_num_events_synthetic, no_high_risk_sy, Low_synth_events = smote_data_stats()
 
-    print(f'Total CDMS after cleaning = {total_cdms}\n')
-    print(f'Total number of events = {total_num_events}\n')
+    print(f'Raw number of CDMs = {total_cdms}')
+    print(f'Total number of RAW events = {total_num_events}')
+    print(f'Ttoal CDMS after SMOTE =  {total_syntethic_cdms}')
+    
+    print(f'Total number of new events syntethic + original {total_num_events_synthetic}')
+    '''
+    print(no_high_risk_sy)
     print(no_high_risk_events)
+    '''
