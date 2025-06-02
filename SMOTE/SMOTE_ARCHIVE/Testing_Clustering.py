@@ -1,8 +1,8 @@
 import pandas as pd
 import scipy
 import numpy as np
-from formatting_and_interpolation import Interpolate_
-from DTW_class_merged import TimeSeriesClustering
+from SMOTE.SMOTE_ARCHIVE.formatting_and_interpolation import Interpolate_
+from SMOTE.SMOTE_ARCHIVE.DTW_class_merged import TimeSeriesClustering
 import matplotlib.pyplot as plt
 
 def pandas_data_frame_creation ():

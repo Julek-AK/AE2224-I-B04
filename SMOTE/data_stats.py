@@ -83,8 +83,6 @@ def count_risk_events(df):
 
     return no_high_risk_events, no_low_risk_events
 
-
-
 if __name__ == '__main__':
     #Create raw data_frame
     raw_data = pandas_data_frame_creation()
@@ -101,11 +99,10 @@ if __name__ == '__main__':
     print(f'Number of low risk events in the raw data frame = {NUMBER_OF_LOW_RISK_EVENTS_RAW_DATA}')
     print(f'Number of high risk events in the data frame = {NUMBER_OF_HIGH_RISK_EVENTS_RAW_DATA}\n ')
 
+
+
+
     TOTAL_CDMS_AFTER_SMOTE, TOTAL_EVENTS_AFTER_SMOTE, TOTAL_SYNTETHIC_CDMS, TOTAL_SYNTHETIC_EVENTS = smote_data_stats()
-
-
-
-
 
 
 
