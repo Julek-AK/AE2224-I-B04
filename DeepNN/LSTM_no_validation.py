@@ -25,7 +25,7 @@ def data_create(data_type):
     # Filter out sequences with target value == -30
     filtered = [(seq, length) for seq, length in zip(sequences, lengths) if seq[-1][2] != -30]
     # separate long and short sequences
-    MIN_LENGTH = 5
+    MIN_LENGTH = 2
     long_sequences = [(seq, length) for seq, length in filtered if length >= MIN_LENGTH]
     short_sequences = [seq for seq, length in filtered if length < MIN_LENGTH]
     short_targets = torch.tensor([seq[-1][2] for seq in short_sequences], device=device).unsqueeze(1)  
@@ -44,11 +44,11 @@ def data_create(data_type):
     padded = padded.to(device)
     targets = targets.to(device)
     
-    return padded, targets, lengths, short_sequences, short_targets
+    return padded, targets, lengths, short_sequences, short_targets, sequences
 
 # Load the datasets (train and test)
-padded_train, targets_train, lengths_train, short_sequences_train, short_targets_train = data_create("train")
-padded_test, targets_test, lengths_test, short_sequences_test, short_targets_test = data_create("test")
+padded_train, targets_train, lengths_train, short_sequences_train, short_targets_train, dummy = data_create("train")
+padded_test, targets_test, lengths_test, short_sequences_test, short_targets_test, baseline_long_sequences = data_create("test")
 
 # Model setup
 input_size = padded_train.shape[2]  # e.g. 5 features
@@ -157,7 +157,10 @@ def default_prediction(seq):
         return -3.5
     else:
         return -6.0001
-
+    
+baseline_long = torch.tensor([seq[-2][2] for seq in baseline_long_sequences], device=device).unsqueeze(1)
+baseline_short = torch.tensor([seq[-1][2] for seq in short_sequences_test], device=device).unsqueeze(1)
+baseline = torch.cat([baseline_short, baseline_long]).squeeze()
 # Prediction function for both short and long sequences
 def predict_with_default(model, sequences, lengths, short_sequences):
     preds = []
@@ -220,6 +223,7 @@ def scoring(outputs, targets):
 # Final evaluation on test set
 print("Test set:")
 scoring(outputs_test, targets_test)
+scoring(baseline, targets_test)
 
 # Diagnostics
 def diagnostics(outputs, targets, train_losses, test_losses, test_f2_scores, test_mse_scores, dataset_name="Test Set"):

@@ -35,8 +35,8 @@ def readData4(data_type):
         # Perform stratified split
         trainset, validationset = train_test_split(
             list(zip(grouped_events, lengths)),
-            test_size=0.01,
-            random_state=43,
+            test_size=0.1,
+            random_state=45,
             stratify=labels
         )
 
@@ -66,29 +66,6 @@ def readData5(data_type):
 
     return grouped_events, lengths
 
-#the good state = 42
-def cleanup(csv):
-    """
-    Removes all NaN values, as well as events with physically nonsensical parameters
-    Based on kesslerlib, https://github.com/kesslerlib/kessler 
-    """
-
-    original_length = len(csv)
-    print(f"Starting with {original_length} entries.")
-    print("Removing invalid values")
-
-    # Remove NaN values
-    csv.dropna(inplace=True)
-
-    # Remove outliers
-    # outlier_features = ['t_sigma_r', 't_sigma_t', 't_sigma_n', 't_sigma_rdot', 't_sigma_tdot', 't_sigma_ndot']
-    csv = csv[csv['t_sigma_r'] <= 20]
-    csv = csv[csv['c_sigma_r'] <= 1000]
-    csv = csv[csv['t_sigma_t'] <= 2000]
-    csv = csv[csv['c_sigma_t'] <= 100000]
-    csv = csv[csv['t_sigma_n'] <= 10]
-    csv = csv[csv['c_sigma_n'] <= 450]
-
-    final_length = len(csv)
-    print(f"Remaining entries: {final_length}, which is {final_length/original_length:.3g} of the original.")
-    return csv
+# filter1 = [seq for seq in readData4("train")[0] if len(seq)>=7]
+# filter2 = [seq for seq in filter1 if seq[-1][2] != -30]
+# print(len(filter2))  # Count sequences longer than 5 in test set

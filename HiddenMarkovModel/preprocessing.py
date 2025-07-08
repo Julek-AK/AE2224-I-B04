@@ -40,7 +40,7 @@ def cleanup(csv):
     return csv
 
 
-def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
+def generate_hmm_data(filename, risk_threshold=-6, smote=False, verbose=False):
     """
     Processes the raw dataset into a format accepted by hidden markov models
     the resulting dataframe has columns:
@@ -57,7 +57,7 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
     print(f"Processing file {filename}")
 
     csv = pd.read_csv(rf"DataSets\{filename}")
-    csv = cleanup(csv)
+    if not smote: csv = cleanup(csv)  # Since SMOTE data has been cleaned beforehand
 
     # Additional cleanups
     csv = csv[csv['time_to_tca'] > 0]
@@ -118,12 +118,12 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
                     else:
                         i+=1
 
-            # Pad-left
+            # Pad right
             for i in range(1, 15):
                 if risk_sequence[i] is None:
                     risk_sequence[i] = risk_sequence[i-1]
 
-            # Pad-right
+            # Pad left
             for i in range(2, 16):
                 if risk_sequence[-i] is None:
                     risk_sequence[-i] = risk_sequence[-i+1]
@@ -137,16 +137,15 @@ def generate_hmm_data(filename, risk_threshold=-6, verbose=False):
         final_state = predictions[-1]
         prediction = (first_prediction, final_state)
 
-
         # Add to the dataset
         new_row = pd.DataFrame([{'event_id': event_id, 'observations': risk_sequence, 'outcome': prediction}])
         data = pd.concat([data, new_row], ignore_index=True)
 
     data.to_csv(f"./DataSets/HMM_{filename}", index=False)
     print(f"Data saved as HMM_{filename}")
-            
+
 
 if __name__ == '__main__':
     # generate_hmm_data("train_data.csv" )
     # generate_hmm_data("train_data.csv", verbose=False)
-    generate_hmm_data("test_data_shifted.csv", verbose=True)
+    generate_hmm_data("SMOTE_data3.csv", smote=True, verbose=True)
